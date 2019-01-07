@@ -27,7 +27,7 @@ RUN git clone -b tornado https://github.com/beehive-lab/graal-jvmci-8
 WORKDIR /tornado/graal-jvmci-8
 RUN echo "JAVA_HOME=/usr/lib/jvm/java-8-oracle/jre/bin/java" >> /tornado/graal-jvmci-8/mx.jvmci/env
 RUN cat /tornado/graal-jvmci-8/mx.jvmci/env
-RUN mx build -p; exit 0 
+RUN mx build -p; exit 0 ### XXX 
 RUN mx build -p 
 
 ## Compile Tornado
