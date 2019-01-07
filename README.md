@@ -1,0 +1,25 @@
+# Docker for Tornado-GPU
+
+
+## Prerequisites
+
+The `tornado-gpu` docker image needs the docker `nvidia` daemon. 
+More info here: [https://github.com/NVIDIA/nvidia-docker](https://github.com/NVIDIA/nvidia-docker).
+
+## How to run?
+
+1) Pull the image
+
+```bash
+$ docker pull beehive/tornado-gpu 
+```
+
+2) Run an experiment
+
+```bash
+$ ./run.sh javac.py example/MatrixMultiplication.java
+$ ./run.sh tornado example/MatrixMultiplication 
+```
+
+Enjoy Tornado!! 
+
