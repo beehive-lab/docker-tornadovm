@@ -11,7 +11,7 @@ More info here: [https://github.com/NVIDIA/nvidia-docker](https://github.com/NVI
 1) Pull the image
 
 ```bash
-$ docker pull beehive/tornado-gpu 
+$ docker pull beehivelab/tornado-gpu 
 ```
 
 2) Run an experiment
