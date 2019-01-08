@@ -23,3 +23,4 @@ $ ./run.sh tornado example/MatrixMultiplication
 
 Enjoy Tornado!! 
 
+Docker scripts have been inspired by https://github.com/blang/latex-docker 
