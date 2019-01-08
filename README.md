@@ -1,5 +1,6 @@
-# Docker for Tornado-GPU
+![](https://img.shields.io/docker/pulls/beehivelab/tornado-gpu.svg)
 
+# Docker for Tornado-GPU
 
 ## Prerequisites
 
