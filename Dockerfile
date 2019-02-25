@@ -40,8 +40,8 @@ ENV TORNADO_SDK /tornado/tornado/bin/sdk
 WORKDIR /tornado/tornado
 RUN mvn package
 
-RUN cd /tornado/tornado/bin && ln -s /tornado/tornado/dist/tornado-sdk/tornado-sdk-0.1.0-SNAPSHOT-*/bin/ bin
-RUN cd /tornado/tornado/bin && ln -s /tornado/tornado/dist/tornado-sdk/tornado-sdk-0.1.0-SNAPSHOT-*/ sdk
+RUN cd /tornado/tornado/bin && ln -s /tornado/tornado/dist/tornado-sdk/tornado-sdk-*/bin/ bin
+RUN cd /tornado/tornado/bin && ln -s /tornado/tornado/dist/tornado-sdk/tornado-sdk-*/ sdk
 
 # Tornado ENV-Variables
 ENV PATH /tornado/tornado/bin/bin:$PATH
