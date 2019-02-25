@@ -12,7 +12,7 @@ More info here: [https://github.com/NVIDIA/nvidia-docker](https://github.com/NVI
 1) Pull the image
 
 ```bash
-$ docker pull beehivelab/tornado-gpu 
+$ docker pull beehivelab/tornado-gpu:latest
 ```
 
 2) Run an experiment
