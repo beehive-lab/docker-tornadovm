@@ -32,7 +32,7 @@ RUN mx build -p
 
 ## Compile Tornado
 WORKDIR /tornado
-RUN git clone https://github.com/beehive-lab/Tornado.git tornado
+RUN git clone https://github.com/beehive-lab/TornadoVM.git tornado
 ENV JAVA_HOME /tornado/graal-jvmci-8/jdk1.8.0_191/product/
 ENV PATH /tornado/tornado/bin/bin:$PATH
 ENV PATH /usr/lib/jvm/java-8-oracle/bin:$PATH
