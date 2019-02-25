@@ -25,7 +25,7 @@ public class MatrixMultiplication {
     public static void main(String[] args) {
 
         int size = 512;
-        if (args.length > 1) {
+        if (args.length >= 1) {
             try {
                 size = Integer.parseInt(args[0]);
             } catch (NumberFormatException nfe) {

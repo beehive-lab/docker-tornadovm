@@ -1,6 +1,6 @@
 FROM nvidia/opencl
 
-MAINTAINER Juan Fumero <juan.fumero@manchester.ac.uk>
+LABEL MAINTAINER Juan Fumero <juan.fumero@manchester.ac.uk>
 
 RUN apt-get update
 RUN apt-get install vim git cmake -y
