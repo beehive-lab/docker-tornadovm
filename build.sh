@@ -1,1 +1,3 @@
-docker build --cpuset-cpus="0-7" -t tornado-gpu .
+
+IMAGE=tornado-gpu
+docker build --cpuset-cpus="0-7" -t $IMAGE .
