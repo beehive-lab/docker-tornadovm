@@ -28,7 +28,11 @@ $ cd docker-tornado
 $ ./run.sh javac.py example/MatrixMultiplication.java
 
 ## Run with TornadoVM on the NVIDIA GPU !
-$ ./run.sh tornado example/MatrixMultiplication 
+$ ./run.sh tornado example/MatrixMultiplication 2048   ## Running on NVIDIA GP100
+Computing MxM of 2048x2048
+	CPU Execution: 0.36 GFlops, Total time = 48254 ms
+	GPU Execution: 277.09 GFlops, Total Time = 62 ms
+	Speedup: 778x 
 ```
 
 ### Some options
