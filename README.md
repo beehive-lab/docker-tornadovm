@@ -1,7 +1,7 @@
 # Docker for Tornado-GPU
 
 
-![](https://img.shields.io/docker/pulls/beehivelab/tornado-gpu.svg)  [![](https://img.shields.io/badge/License-Apache%202.0-orange.svg)](https://opensource.org/licenses/Apache-2.0)
+![](https://img.shields.io/docker/pulls/beehivelab/tornado-gpu.svg?color=green&label=docker%20pulls%20nvidia)  [![](https://img.shields.io/badge/License-Apache%202.0-orange.svg)](https://opensource.org/licenses/Apache-2.0)
 
 ## Prerequisites
 
