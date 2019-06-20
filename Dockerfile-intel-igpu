@@ -1,6 +1,6 @@
 FROM intelopencl/intel-opencl:ubuntu-18.04-ppa
 
-LABEL MAINTAINER Juan Fumero <juan.fumero@manchester.ac.uk>
+LABEL MAINTAINER Michail Papadimitriou <michail.papadimitriou@manchester.ac.uk>
 
 RUN apt-get update
 RUN apt-get install vim git cmake -y
