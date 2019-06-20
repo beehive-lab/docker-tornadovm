@@ -1,12 +1,15 @@
 # Docker for Tornado-GPU
 
 
-![](https://img.shields.io/docker/pulls/beehivelab/tornado-gpu.svg?color=green&label=docker%20pulls%20nvidia)  [![](https://img.shields.io/badge/License-Apache%202.0-orange.svg)](https://opensource.org/licenses/Apache-2.0)
+![](https://img.shields.io/docker/pulls/beehivelab/tornado-gpu.svg?color=green&label=docker%20pulls%20nvidia)  ![](https://img.shields.io/docker/pulls/beehivelab/tornado-intel-gpu.svg?color=purple&label=docker%20pulls%20intel)  [![](https://img.shields.io/badge/License-Apache%202.0-orange.svg)](https://opensource.org/licenses/Apache-2.0)
 
 ## Prerequisites
 
-The `tornado-gpu` docker image needs the docker `nvidia` daemon. 
+* The `tornado-gpu` docker image needs the docker `nvidia` daemon. 
 More info here: [https://github.com/NVIDIA/nvidia-docker](https://github.com/NVIDIA/nvidia-docker).
+
+* The `tornado-intel-gpu` docker image needs the docker `intel-opencl` daemon. 
+More info here: [https://github.com/intel/compute-runtime](https://github.com/intel/compute-runtime).
 
 ## How to run?
 
