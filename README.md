@@ -15,13 +15,20 @@ More info here: [https://github.com/intel/compute-runtime](https://github.com/in
 
 1) Pull the image
 
+* For the `nvidia` image:
 ```bash
 $ docker pull beehivelab/tornado-gpu:latest
+```
+* For the `intel-gpu` image:
+```bash
+$ docker pull beehivelab/tornado-intel-gpu:latest
 ```
 
 2) Run an experiment
 
-We provide a runner script that compiles and run your Java programs with Tornado. Here's an example: 
+We provide a runner script that compiles and run your Java programs with Tornado. Here's an example:
+
+[in the case of `intel-gpu` image use the `run_intel.sh` script instead]
 
 ```bash
 $ git clone https://github.com/beehive-lab/docker-tornado
