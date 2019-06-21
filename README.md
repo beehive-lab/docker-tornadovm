@@ -27,8 +27,6 @@ $ docker pull beehivelab/tornado-gpu:latest
 
 We provide a runner script that compiles and run your Java programs with Tornado. Here's an example:
 
-[in the case of `intel-gpu` image use the `run_intel.sh` script instead]
-
 ```bash
 $ git clone https://github.com/beehive-lab/docker-tornado
 $ cd docker-tornado
@@ -64,7 +62,7 @@ $ ./run.sh tornado -Xmx16g -Xms16g example/MatrixMultiplication
 
 ### Prerequisites
 
-The `tornado-intel-gpu` docker image needs the docker `intel-opencl` daemon.  More info here: [https://github.com/intel/compute-runtime](https://github.com/intel/compute-runtime).
+The `tornado-intel-gpu` docker image Intel OpenCL driver for the integrated GPU installed.  More info here: [https://github.com/intel/compute-runtime](https://github.com/intel/compute-runtime).
 
 ### How to run?
 
@@ -93,8 +91,6 @@ Computing MxM of 256x256
 	Speedup: 5x
 
 ```
-
-
 
 
 Enjoy Tornado!! 
