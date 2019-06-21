@@ -1,14 +1,20 @@
 # Docker for TornadoVM
 
-![](https://img.shields.io/docker/pulls/beehivelab/tornado-gpu.svg?color=green&label=docker%20pulls%20nvidia)  ![](https://img.shields.io/docker/pulls/beehivelab/tornado-intel-gpu.svg?color=purple&label=docker%20pulls%20intel)  [![](https://img.shields.io/badge/License-Apache%202.0-orange.svg)](https://opensource.org/licenses/Apache-2.0)
+![](https://img.shields.io/docker/pulls/beehivelab/tornado-gpu.svg?color=green&label=docker%20pulls%20nvidia)  ![](https://img.shields.io/docker/pulls/beehivelab/tornado-intel-gpu.svg?color=blue&label=docker%20pulls%20intel)  [![](https://img.shields.io/badge/License-Apache%202.0-orange.svg)](https://opensource.org/licenses/Apache-2.0)
 
-# Nvidia GPUs
-## Prerequisites
+We have two docker configurations for TornadoVM:
 
-The `tornado-gpu` docker image needs the docker `nvidia` daemon. 
-More info here: [https://github.com/NVIDIA/nvidia-docker](https://github.com/NVIDIA/nvidia-docker).
+* TornadoVM Docker for NVIDIA GPUs: See [instructions](https://github.com/beehive-lab/docker-tornado#Nvidia)
+* TornadoVM Docker for Intel Integrated Graphics: See [instructions](https://github.com/beehive-lab/docker-tornado#Intel)
 
-## How to run?
+
+## Nvidia GPUs
+
+### Prerequisites
+
+The `tornado-gpu` docker image needs the docker `nvidia` daemon.  More info here: [https://github.com/NVIDIA/nvidia-docker](https://github.com/NVIDIA/nvidia-docker).
+
+### How to run?
 
 1) Pull the image
 
@@ -54,13 +60,13 @@ The `tornado` command is just an alias to the `java` command with all the parame
 $ ./run.sh tornado -Xmx16g -Xms16g example/MatrixMultiplication
 ```
 
-# Intel Intergrated GPUs
-## Prerequisites
+## Intel Intergrated GPUs
 
-The `tornado-intel-gpu` docker image needs the docker `intel-opencl` daemon. 
-More info here: [https://github.com/intel/compute-runtime](https://github.com/intel/compute-runtime).
+### Prerequisites
 
-## How to run?
+The `tornado-intel-gpu` docker image needs the docker `intel-opencl` daemon.  More info here: [https://github.com/intel/compute-runtime](https://github.com/intel/compute-runtime).
+
+### How to run?
 
 1) Pull the image
 
@@ -87,7 +93,6 @@ Computing MxM of 256x256
 	Speedup: 5x
 
 ```
-
 
 
 
