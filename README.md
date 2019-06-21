@@ -4,8 +4,8 @@
 
 We have two docker configurations for TornadoVM:
 
-* TornadoVM Docker for NVIDIA GPUs: See [instructions](https://github.com/beehive-lab/docker-tornado#Nvidia)
-* TornadoVM Docker for Intel Integrated Graphics: See [instructions](https://github.com/beehive-lab/docker-tornado#Intel)
+* TornadoVM Docker for NVIDIA GPUs: See [instructions](https://github.com/beehive-lab/docker-tornado#nvidia-gpus)
+* TornadoVM Docker for Intel Integrated Graphics: See [instructions](https://github.com/beehive-lab/docker-tornado#intel-intergrated-graphics)
 
 
 ## Nvidia GPUs
