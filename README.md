@@ -1,27 +1,20 @@
-# Docker for Tornado-GPU
-
+# Docker for TornadoVM
 
 ![](https://img.shields.io/docker/pulls/beehivelab/tornado-gpu.svg?color=green&label=docker%20pulls%20nvidia)  ![](https://img.shields.io/docker/pulls/beehivelab/tornado-intel-gpu.svg?color=purple&label=docker%20pulls%20intel)  [![](https://img.shields.io/badge/License-Apache%202.0-orange.svg)](https://opensource.org/licenses/Apache-2.0)
 
+# Nvidia GPUs
 ## Prerequisites
 
-* The `tornado-gpu` docker image needs the docker `nvidia` daemon. 
+The `tornado-gpu` docker image needs the docker `nvidia` daemon. 
 More info here: [https://github.com/NVIDIA/nvidia-docker](https://github.com/NVIDIA/nvidia-docker).
-
-* The `tornado-intel-gpu` docker image needs the docker `intel-opencl` daemon. 
-More info here: [https://github.com/intel/compute-runtime](https://github.com/intel/compute-runtime).
 
 ## How to run?
 
 1) Pull the image
 
-* For the `nvidia` image:
+For the `nvidia` image:
 ```bash
 $ docker pull beehivelab/tornado-gpu:latest
-```
-* For the `intel-gpu` image:
-```bash
-$ docker pull beehivelab/tornado-intel-gpu:latest
 ```
 
 2) Run an experiment
@@ -60,6 +53,44 @@ The `tornado` command is just an alias to the `java` command with all the parame
 ```bash
 $ ./run.sh tornado -Xmx16g -Xms16g example/MatrixMultiplication
 ```
+
+# Intel Intergrated GPUs
+## Prerequisites
+
+The `tornado-intel-gpu` docker image needs the docker `intel-opencl` daemon. 
+More info here: [https://github.com/intel/compute-runtime](https://github.com/intel/compute-runtime).
+
+## How to run?
+
+1) Pull the image
+
+For the `intel-gpu` image:
+```bash
+$ docker pull beehivelab/tornado-intel-gpu:latest
+```
+2) Run an experiment
+
+We provide a runner script that compiles and run your Java programs with Tornado. Here's an example:
+
+```bash
+$ git clone https://github.com/beehive-lab/docker-tornado
+$ cd docker-tornado
+
+## Compile Matrix Multiplication - provided in the docker-tornado repository
+$ ./run_intel.sh javac.py example/MatrixMultiplication.java
+
+## Run with TornadoVM on the NVIDIA GPU !
+$ ./run_intel.sh tornado example/MatrixMultiplication 2048   ## Running on Intel(R) Gen9 HD Graphics
+Computing MxM of 256x256
+	CPU Execution: 1.53 GFlops, Total time = 22 ms
+	GPU Execution: 8.39 GFlops, Total Time = 4 ms
+	Speedup: 5x
+
+```
+
+
+
+
 
 Enjoy Tornado!! 
 
