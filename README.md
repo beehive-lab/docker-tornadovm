@@ -54,7 +54,7 @@ The `tornado` command is just an alias to the `java` command with all the parame
 $ ./run.sh tornado -Xmx16g -Xms16g example/MatrixMultiplication
 ```
 
-# Intel Intergrated GPUs
+# Intel Intergrated Graphics
 ## Prerequisites
 
 The `tornado-intel-gpu` docker image needs the docker `intel-opencl` daemon. 
@@ -79,7 +79,7 @@ $ cd docker-tornado
 ## Compile Matrix Multiplication - provided in the docker-tornado repository
 $ ./run_intel.sh javac.py example/MatrixMultiplication.java
 
-## Run with TornadoVM on the NVIDIA GPU !
+## Run with TornadoVM on the Intel Intergrated GPU !
 $ ./run_intel.sh tornado example/MatrixMultiplication 2048   ## Running on Intel(R) Gen9 HD Graphics
 Computing MxM of 256x256
 	CPU Execution: 1.53 GFlops, Total time = 22 ms
