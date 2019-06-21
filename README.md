@@ -84,7 +84,7 @@ $ cd docker-tornado
 $ ./run_intel.sh javac.py example/MatrixMultiplication.java
 
 ## Run with TornadoVM on the Intel Intergrated GPU !
-$ ./run_intel.sh tornado example/MatrixMultiplication 2048   ## Running on Intel(R) Gen9 HD Graphics
+$ ./run_intel.sh tornado example/MatrixMultiplication 256   ## Running on Intel(R) Gen9 HD Graphics
 Computing MxM of 256x256
 	CPU Execution: 1.53 GFlops, Total time = 22 ms
 	GPU Execution: 8.39 GFlops, Total Time = 4 ms
