@@ -33,7 +33,7 @@ RUN mx build -p
 ## Compile Tornado
 WORKDIR /tornado
 RUN git clone https://github.com/beehive-lab/TornadoVM.git tornado
-ENV JAVA_HOME /tornado/graal-jvmci-8/jdk1.8.0_212/product
+ENV JAVA_HOME /tornado/graal-jvmci-8/jdk1.8.0_222/product
 ENV PATH /tornado/tornado/bin/bin:$PATH
 ENV PATH /usr/lib/jvm/java-8-oracle/bin:$PATH
 ENV TORNADO_SDK /tornado/tornado/bin/sdk
@@ -48,7 +48,7 @@ RUN cd /tornado/tornado/bin && ln -s /tornado/tornado/dist/tornado-sdk/tornado-s
 
 # Tornado ENV-Variables
 ENV PATH /tornado/tornado/bin/bin:$PATH
-ENV PATH /tornado/graal-jvmci-8/jdk1.8.0_212/product/bin:$PATH
+ENV PATH /tornado/graal-jvmci-8/jdk1.8.0_222/product/bin:$PATH
 ENV TORNADO_SDK /tornado/tornado/bin/sdk 
 
 WORKDIR /data
