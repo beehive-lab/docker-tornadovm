@@ -3,7 +3,7 @@
 IMAGE=tornado-gpu
 docker build --cpuset-cpus="0-7" -t $IMAGE .
 
-TAG=0.5
+TAG=0.6
 docker tag tornado-gpu beehivelab/tornado-gpu:$TAG
 
 TAG=latest
