@@ -6,6 +6,7 @@ RUN apt-get update
 RUN apt-get install vim git cmake -y
 RUN apt-get install maven -y
 RUN apt-get install openjdk-8-jdk -y
+RUN apt-get install wget -y  
 RUN apt-get update -q && apt-get install -qy \
     python-pip \
     && rm -rf /var/lib/apt/lists/*
