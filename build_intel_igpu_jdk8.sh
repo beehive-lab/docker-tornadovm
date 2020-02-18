@@ -1,6 +1,6 @@
 #!/bin/bash
 
-IMAGE=tornado-intel-igpu
+IMAGE=tornado-intel-gpu
 docker build --cpuset-cpus="0-7" -t $IMAGE -f Dockerfile-intel-igpu .
 
 TAG=0.6
