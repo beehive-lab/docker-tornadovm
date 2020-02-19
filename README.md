@@ -2,11 +2,18 @@
 
 ![](https://img.shields.io/docker/pulls/beehivelab/tornado-gpu.svg?color=green&label=docker%20pulls%20nvidia)  ![](https://img.shields.io/docker/pulls/beehivelab/tornado-intel-gpu.svg?color=blue&label=docker%20pulls%20intel)  [![](https://img.shields.io/badge/License-Apache%202.0-orange.svg)](https://opensource.org/licenses/Apache-2.0)
 
-We have two docker configurations for TornadoVM:
+We have two docker configurations for TornadoVM using 3 different JDKs:
 
 * TornadoVM Docker for **NVIDIA GPUs**: See [instructions](https://github.com/beehive-lab/docker-tornado#nvidia-gpus)
+    * JDKs supported:
+	    * TornadoVM with OpenJDK 8 
+		* TornadoVM with GraalVM 19.3 and JDK 8 
+		* TornadoVM with GraalVM 19.3 and JDK 11
 * TornadoVM Docker for **Intel Integrated Graphics**: See [instructions](https://github.com/beehive-lab/docker-tornado#intel-intergrated-graphics)
-
+    * JDKs supported:
+	    * TornadoVM with OpenJDK 8 
+		* TornadoVM with GraalVM 19.3 and JDK 8 
+		* TornadoVM with GraalVM 19.3 and JDK 11
 
 ## Nvidia GPUs
 
@@ -22,6 +29,8 @@ For the `nvidia` image:
 ```bash
 $ docker pull beehivelab/tornado-gpu:latest
 ```
+
+This image uses the latest TornadoVM for NVIDIA GPUs and OpenJDK 8.
 
 2) Run an experiment
 
@@ -42,6 +51,20 @@ Computing MxM of 2048x2048
 	Speedup: 778x 
 ```
 
+### Using TornadoVM with GraalVM for NVIDIA GPUs
+
+With JDK 8:
+
+```bash
+$ docker pull beehivelab/tornado-gpu-graalvm-jdk8:latest
+```
+
+With JDK 11:
+
+```bash
+$ docker pull beehivelab/tornado-gpu-graalvm-jdk11:latest
+```
+
 ### Some options
 
 ```bash
@@ -58,7 +81,7 @@ The `tornado` command is just an alias to the `java` command with all the parame
 $ ./run_nvidia.sh tornado -Xmx16g -Xms16g example/MatrixMultiplication
 ```
 
-# Intel Intergrated Graphics
+# Intel Integrated Graphics
 
 ### Prerequisites
 
@@ -72,6 +95,9 @@ For the `intel-gpu` image:
 ```bash
 $ docker pull beehivelab/tornado-intel-gpu:latest
 ```
+
+This image uses the latest TornadoVM for Intel integrated graphics and OpenJDK 8.
+
 2) Run an experiment
 
 We provide a runner script that compiles and run your Java programs with Tornado. Here's an example:
@@ -92,6 +118,19 @@ Computing MxM of 256x256
 
 ```
 
+### Using TornadoVM with GraalVM for Intel Integrated Graphics
+
+With JDK 8:
+
+```bash
+$ docker pull beehivelab/tornado-intel-igpu-graalvm-jdk8:latest
+```
+
+With JDK 11:
+
+```bash
+$ docker pull beehivelab/tornado-intel-igpu-graalvm-jdk11:latest
+```
 
 Enjoy Tornado!! 
 

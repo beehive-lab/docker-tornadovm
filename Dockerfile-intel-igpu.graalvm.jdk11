@@ -47,7 +47,6 @@ RUN cd /tornado/tornado/bin && ln -s /tornado/tornado/dist/tornado-sdk/tornado-s
 # Tornado ENV-Variables
 ENV PATH /tornado/tornado/bin/bin:$PATH
 ENV TORNADO_SDK /tornado/tornado/bin/sdk 
-ENV PATH $JAVA_HOME/bin:$PATH
 
 WORKDIR /data
 VOLUME ["/data"]
