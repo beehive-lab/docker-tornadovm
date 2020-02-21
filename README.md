@@ -1,6 +1,10 @@
 # Docker for TornadoVM
 
-![](https://img.shields.io/docker/pulls/beehivelab/tornado-gpu.svg?color=green&label=docker%20pulls%20nvidia)  ![](https://img.shields.io/docker/pulls/beehivelab/tornado-intel-gpu.svg?color=blue&label=docker%20pulls%20intel)  [![](https://img.shields.io/badge/License-Apache%202.0-orange.svg)](https://opensource.org/licenses/Apache-2.0)
+![](https://img.shields.io/docker/pulls/beehivelab/tornado-gpu.svg?color=green&label=docker%20pulls%20nvidia%20jdk8) ![](https://img.shields.io/docker/pulls/beehivelab/tornado-gpu-graalvm-jdk8.svg?color=green&label=docker%20pulls%20nvidia%20graal%20jdk8) ![](https://img.shields.io/docker/pulls/beehivelab/tornado-gpu-graalvm-jdk11.svg?color=green&label=docker%20pulls%20nvidia%20graal%20jdk11)
+
+![](https://img.shields.io/docker/pulls/beehivelab/tornado-intel-gpu.svg?color=blue&label=docker%20pulls%20intel%20jdk8)  ![](https://img.shields.io/docker/pulls/beehivelab/tornado-intel-igpu-graalvm-jdk8.svg?color=blue&label=docker%20pulls%20intel%20graal%20jdk8)  ![](https://img.shields.io/docker/pulls/beehivelab/tornado-intel-igpu-graalvm-jdk11.svg?color=blue&label=docker%20pulls%20intel%20graal%20jdk11)  
+
+[![](https://img.shields.io/badge/License-Apache%202.0-orange.svg)](https://opensource.org/licenses/Apache-2.0)
 
 We have two docker configurations for TornadoVM using 3 different JDKs:
 
