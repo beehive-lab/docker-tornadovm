@@ -85,7 +85,7 @@ The `tornado` command is just an alias to the `java` command with all the parame
 $ ./run_nvidia.sh tornado -Xmx16g -Xms16g example/MatrixMultiplication
 ```
 
-# Intel Integrated Graphics
+## Intel Integrated Graphics
 
 ### Prerequisites
 
