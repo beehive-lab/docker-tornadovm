@@ -17,9 +17,9 @@
 		 </activation>
 		 <properties>
 			 <!-- Your PATH TO JDK1.8-JVMCI-->
-			 <jvmci.root>/tornado/graal-jvmci-8/openjdk1.8.0_242/linux-amd64/product</jvmci.root>
+			 <jvmci.root>/tornado/graal-jvmci-8/openjdk1.8.0_252/linux-amd64/product</jvmci.root>
 			 <!-- Your JDK1.8-JVMCI version-->
-		 	 <jvmci.version>1.8.0_242</jvmci.version>
+		 	 <jvmci.version>1.8.0_252</jvmci.version>
 		 </properties>
 	 </profile>
 	 </profiles>
