@@ -3,7 +3,7 @@
 IMAGE=tornado-intel-igpu-graalvm-jdk8
 docker build --cpuset-cpus="0-7" -t $IMAGE -f Dockerfile-intel-igpu.graalvm.jdk8 .
 
-TAG=0.6
+TAG=0.7
 docker tag $IMAGE beehivelab/$IMAGE:$TAG
 
 TAG=latest
