@@ -31,13 +31,14 @@ ENV JAVA_HOME=/graalvm/graalvm-ce-java11-20.2.0/
 RUN $JAVA_HOME/bin/npm install express
 RUN $JAVA_HOME/bin/npm install jimp
 
-## Compile Tornado
+## Compile TornadoVM
 WORKDIR /tornado
 RUN git clone https://github.com/beehive-lab/TornadoVM.git tornado
 ENV JAVA_HOME=/graalvm/graalvm-ce-java11-20.2.0/
 ENV PATH /tornado/tornado/bin/bin:$PATH
 ENV PATH $JAVA_HOME/bin:$PATH
 ENV TORNADO_SDK /tornado/tornado/bin/sdk
+ENV CMAKE_ROOT=/usr
 WORKDIR /tornado/tornado
 RUN ./bin/compile.sh graal-jdk-11 opencl
 
@@ -58,4 +59,4 @@ WORKDIR /data
 VOLUME ["/data"]
 EXPOSE 3000 
 
-RUN echo "Tornado BUILD done"
+RUN echo "TornadoVM BUILD done"
