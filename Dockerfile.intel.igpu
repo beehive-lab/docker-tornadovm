@@ -17,22 +17,15 @@ RUN javac -version
 
 ENV PATH /usr/lib/jvm/java-8-openjdk-amd64/bin:$PATH
 
-## Compile Graal-JVMCI-8
-WORKDIR /tornado
-RUN git clone --depth 1 https://github.com/beehive-lab/mx 
-ENV PATH /tornado/mx:$PATH 
-RUN git clone --depth 1 https://github.com/beehive-lab/graal-jvmci-8
-WORKDIR /tornado/graal-jvmci-8
-ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64/
-RUN echo "JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64" >> /tornado/graal-jvmci-8/mx.jvmci/env
-RUN cat /tornado/graal-jvmci-8/mx.jvmci/env
-RUN mx build -p; exit 0 ### XXX 
-RUN mx build -p
+## Download JDK8-JVMCI binary
+WORKDIR /tornado/jdk/jvmci-20.2
+RUN wget https://github.com/graalvm/graal-jvmci-8/releases/download/jvmci-20.2-b03/openjdk-8u262+10-jvmci-20.2-b03-linux-amd64.tar.gz
+RUN tar xvzf openjdk-8u262+10-jvmci-20.2-b03-linux-amd64.tar.gz
+ENV JAVA_HOME /tornado/jdk/jvmci-20.2/openjdk1.8.0_262-jvmci-20.2-b03
 
 ## Compile Tornado
 WORKDIR /tornado
 RUN git clone https://github.com/beehive-lab/TornadoVM.git tornado
-ENV JAVA_HOME /tornado/graal-jvmci-8/openjdk1.8.0_252/linux-amd64/product
 ENV PATH /tornado/tornado/bin/bin:$PATH
 ENV PATH $JAVA_HOME/bin:$PATH
 ENV TORNADO_SDK /tornado/tornado/bin/sdk
@@ -40,14 +33,14 @@ WORKDIR /tornado/tornado
 RUN apt-get update && apt-get install -y opencl-headers
 RUN ln -s /usr/lib/x86_64-linux-gnu/libOpenCL.so.1 /usr/lib/x86_64-linux-gnu/libOpenCL.so
 ENV OpenCL_LIBRARY /usr/lib/x86_64-linux-gnu/libOpenCL.so.1
-RUN mvn -Pjdk-8 package
+ENV CMAKE_ROOT=/usr/
+RUN ./bin/compile.sh jdk-8 opencl
 
 RUN cd /tornado/tornado/bin && ln -s /tornado/tornado/dist/tornado-sdk/tornado-sdk-*/bin/ bin
 RUN cd /tornado/tornado/bin && ln -s /tornado/tornado/dist/tornado-sdk/tornado-sdk-*/ sdk
 
 # Tornado ENV-Variables
 ENV PATH /tornado/tornado/bin/bin:$PATH
-ENV PATH /tornado/graal-jvmci-8/jdk1.8.0_252/product/bin:$PATH
 ENV TORNADO_SDK /tornado/tornado/bin/sdk 
 
 WORKDIR /data

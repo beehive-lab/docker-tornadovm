@@ -38,7 +38,7 @@ ENV PATH $JAVA_HOME/bin:$PATH
 ENV TORNADO_SDK /tornado/tornado/bin/sdk
 ENV CMAKE_ROOT=/usr
 WORKDIR /tornado/tornado
-RUN ./bin/compile.sh jdk-8 opencl
+RUN ./bin/compile.sh graal-jdk-8 opencl
 
 RUN cd /tornado/tornado/bin && ln -s /tornado/tornado/dist/tornado-sdk/tornado-sdk-*/bin/ bin
 RUN cd /tornado/tornado/bin && ln -s /tornado/tornado/dist/tornado-sdk/tornado-sdk-*/ sdk

@@ -18,11 +18,11 @@ RUN javac -version
 
 ENV PATH /usr/lib/jvm/java-8-openjdk-amd64/bin:$PATH
 
-## Download Graal 19.3.0
+## Download Graal 20.2.0
 WORKDIR /graalvm
-RUN wget https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-19.3.0/graalvm-ce-java8-linux-amd64-19.3.0.tar.gz
-RUN tar xvzf graalvm-ce-java8-linux-amd64-19.3.0.tar.gz
-ENV JAVA_HOME=/graalvm/graalvm-ce-java8-19.3.0/
+RUN wget https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-20.2.0/graalvm-ce-java8-linux-amd64-20.2.0.tar.gz
+RUN tar xvzf graalvm-ce-java8-linux-amd64-20.2.0.tar.gz
+ENV JAVA_HOME=/graalvm/graalvm-ce-java8-20.2.0/
 
 ## Download NodeJS NPM packages
 RUN $JAVA_HOME/bin/npm install express
@@ -39,7 +39,8 @@ WORKDIR /tornado/tornado
 RUN apt-get update && apt-get install -y opencl-headers
 RUN ln -s /usr/lib/x86_64-linux-gnu/libOpenCL.so.1 /usr/lib/x86_64-linux-gnu/libOpenCL.so
 ENV OpenCL_LIBRARY /usr/lib/x86_64-linux-gnu/libOpenCL.so.1
-RUN mvn -Pgraal-jdk-8 package
+ENV CMAKE_ROOT=/usr
+RUN ./bin/compile.sh graal-jdk-8 opencl
 
 RUN cd /tornado/tornado/bin && ln -s /tornado/tornado/dist/tornado-sdk/tornado-sdk-*/bin/ bin
 RUN cd /tornado/tornado/bin && ln -s /tornado/tornado/dist/tornado-sdk/tornado-sdk-*/ sdk
