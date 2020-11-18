@@ -23,7 +23,7 @@ ENV PATH /usr/lib/jvm/java-11-openjdk-amd64/bin:$PATH
 
 ## Download Graal 20.2.0
 WORKDIR /graalvm
-RUN wget wget https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-20.2.0/graalvm-ce-java11-linux-amd64-20.2.0.tar.gz
+RUN wget https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-20.2.0/graalvm-ce-java11-linux-amd64-20.2.0.tar.gz
 RUN tar xvzf graalvm-ce-java11-linux-amd64-20.2.0.tar.gz
 ENV JAVA_HOME=/graalvm/graalvm-ce-java11-20.2.0/
 
