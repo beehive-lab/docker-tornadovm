@@ -3,7 +3,7 @@ FROM intelopencl/intel-opencl:ubuntu-18.04-ppa
 LABEL MAINTAINER Michail Papadimitriou <michail.papadimitriou@manchester.ac.uk>
 
 RUN apt-get update
-RUN apt-get install vim git cmake -y
+RUN apt-get install vim git cmake wget -y
 RUN apt-get install maven -y
 RUN apt-get install openjdk-8-jdk -y
 RUN apt-get update -q && apt-get install -qy \
