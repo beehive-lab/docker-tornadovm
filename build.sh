@@ -6,8 +6,8 @@ function buildDockerImage() {
     IMAGE=$1
     FILE=$2
     docker build --cpuset-cpus="0-7" -t $IMAGE -f $FILE .
-    docker tag tornado-gpu beehivelab/$IMAGE:$TAG_VERSION
-    docker tag tornado-gpu beehivelab/$IMAGE:latest
+    docker tag $IMAGE beehivelab/$IMAGE:$TAG_VERSION
+    docker tag $IMAGE beehivelab/$IMAGE:latest
 }
 
 function nvidiaJDK8() {
@@ -45,8 +45,6 @@ function printHelp() {
     echo "       --igpu-jdk8            : Build Docker Image for Intel Integrated GPUs using JDK8"
     echo "       --igpu-graalVM-JDK8    : Build Docker Image for Intel Integrated GPUs using GraalVM JDK8"
     echo "       --igpu-graalVM-JDK11   : Build Docker Image for Intel Integrated GPUs using GraalVM JDK11"
-    
-    
     exit 0
 }
 
