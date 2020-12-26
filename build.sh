@@ -5,8 +5,8 @@ TAG_VERSION=0.9-dev
 function nvidiaJDK8() {
     IMAGE=tornado-gpu
     docker build --cpuset-cpus="0-7" -t $IMAGE -f dockerFiles/Dockerfile.nvidia .
-    docker tag tornado-gpu beehivelab/tornado-gpu:$TAG_VERSION
-    docker tag tornado-gpu beehivelab/tornado-gpu:latest
+    docker tag tornado-gpu beehivelab/$IMAGE:$TAG_VERSION
+    docker tag tornado-gpu beehivelab/$IMAGE:latest
 }
 
 function nvidiaGraalVMJDK8() {
