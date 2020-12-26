@@ -2,46 +2,36 @@
 
 TAG_VERSION=0.9-dev
 
-function nvidiaJDK8() {
-    IMAGE=tornado-gpu
-    docker build --cpuset-cpus="0-7" -t $IMAGE -f dockerFiles/Dockerfile.nvidia .
+function buildDockerImage() {
+    IMAGE=$1
+    FILE=$2
+    docker build --cpuset-cpus="0-7" -t $IMAGE -f $FILE .
     docker tag tornado-gpu beehivelab/$IMAGE:$TAG_VERSION
     docker tag tornado-gpu beehivelab/$IMAGE:latest
 }
 
+function nvidiaJDK8() {
+    buildDockerImage "tornado-gpu" "dockerFiles/Dockerfile.nvidia"
+}
+
 function nvidiaGraalVMJDK8() {
-    IMAGE=tornado-gpu-graalvm-jdk8
-    docker build --cpuset-cpus="0-7" -t $IMAGE -f dockerFiles/Dockerfile.nvidia.graalvm.jdk8 .
-    docker tag $IMAGE beehivelab/$IMAGE:$TAG_VERSION
-    docker tag $IMAGE beehivelab/$IMAGE:latest
+    buildDockerImage "tornado-gpu-graalvm-jdk8" "dockerFiles/Dockerfile.nvidia.graalvm.jdk8"
 }
 
 function nvidiaGraalVMJDK11() {
-    IMAGE=tornado-gpu-graalvm-jdk11
-    docker build --cpuset-cpus="0-7" -t $IMAGE -f dockerFiles/Dockerfile.nvidia.graalvm.jdk11 .
-    docker tag $IMAGE beehivelab/$IMAGE:$TAG_VERSION
-    docker tag $IMAGE beehivelab/$IMAGE:latest
+    buildDockerImage "tornado-gpu-graalvm-jdk11" "dockerFiles/Dockerfile.nvidia.graalvm.jdk11"
 }
 
 function intelJDK8() {
-    IMAGE=tornado-intel-gpu
-    docker build --cpuset-cpus="0-7" -t $IMAGE -f dockerFiles/Dockerfile.intel.igpu .
-    docker tag $IMAGE beehivelab/$IMAGE:$TAG_VERSION
-    docker tag $IMAGE beehivelab/$IMAGE:latest
+    buildDockerImage "tornado-intel-gpu" "dockerFiles/Dockerfile.intel.igpu"
 }
 
 function intelGraalVMJDK8() {
-    IMAGE=tornado-intel-igpu-graalvm-jdk8
-    docker build --cpuset-cpus="0-7" -t $IMAGE -f dockerFiles/Dockerfile.intel.igpu.graalvm.jdk8 .
-    docker tag $IMAGE beehivelab/$IMAGE:$TAG_VERSION
-    docker tag $IMAGE beehivelab/$IMAGE:latest
+    buildDockerImage "tornado-intel-igpu-graalvm-jdk8" "dockerFiles/Dockerfile.intel.igpu.graalvm.jdk8"
 }
 
 function intelGraalVMJDK11() {
-    IMAGE=tornado-intel-igpu-graalvm-jdk11
-    docker build --cpuset-cpus="0-7" -t $IMAGE -f dockerFiles/Dockerfile.intel.igpu.graalvm.jdk11 .
-    docker tag $IMAGE beehivelab/$IMAGE:$TAG_VERSION
-    docker tag $IMAGE beehivelab/$IMAGE:latest
+    buildDockerImage "tornado-intel-igpu-graalvm-jdk11" "dockerFiles/Dockerfile.intel.igpu.graalvm.jdk11"
 }
 
 function printHelp() {
