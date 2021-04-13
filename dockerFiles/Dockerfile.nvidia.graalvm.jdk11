@@ -1,4 +1,4 @@
-## Docker File for TornadoVM on NVIDIA GPUs using GraalVM 20.2.0 JDK-11
+## Docker File for TornadoVM on NVIDIA GPUs using GraalVM 20.2.0 JDK11
 ## OpenCL Backend only
 
 FROM nvidia/opencl

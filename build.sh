@@ -5,7 +5,7 @@ TAG_VERSION=0.9-dev
 function buildDockerImage() {
     IMAGE=$1
     FILE=$2
-    docker build --cpuset-cpus="0-7" -t $IMAGE -f $FILE .
+    docker build -t $IMAGE -f $FILE .
     docker tag $IMAGE beehivelab/$IMAGE:$TAG_VERSION
     docker tag $IMAGE beehivelab/$IMAGE:latest
 }
@@ -71,19 +71,19 @@ while [[ $# -gt 0 ]]; do
     nvidiaGraalVMJDK8
     shift
     ;;
-  --nvidia-graalVN-JDK11)
+  --nvidia-graalVM-JDK11)
     nvidiaGraalVMJDK11
     shift
     ;;
-  --intel-jdk8)
+  --igpu-jdk8)
     intelJDK8
     shift
     ;;
-  --intel-graalVM-JDK8)
+  --igpu-graalVM-JDK8)
     intelGraalVMJDK8
     shift
     ;;
-  --intel-graalVN-JDK11)
+  --igpu-graalVM-JDK11)
     intelGraalVMJDK11
     shift
     ;;
