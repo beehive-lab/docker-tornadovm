@@ -24,6 +24,7 @@ WORKDIR /graalvm
 RUN wget https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-21.1.0/graalvm-ce-java11-linux-amd64-21.1.0.tar.gz
 RUN tar xvzf graalvm-ce-java11-linux-amd64-21.1.0.tar.gz
 ENV JAVA_HOME=/graalvm/graalvm-ce-java11-21.1.0/
+RUN $JAVA_HOME/bin/gu install nodejs
 
 ## Download NodeJS NPM packages
 RUN $JAVA_HOME/bin/npm install express
