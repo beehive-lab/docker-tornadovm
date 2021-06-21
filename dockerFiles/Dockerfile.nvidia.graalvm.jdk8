@@ -1,4 +1,4 @@
-## Docker File for TornadoVM on NVIDIA GPUs using GraalVM 20.2.0 JDK8
+## Docker File for TornadoVM on NVIDIA GPUs using GraalVM 21.1.0 JDK8
 ## OpenCL Backend only
 
 FROM nvidia/opencl
@@ -19,11 +19,11 @@ COPY settings/settings.xml /root/.m2/settings.xml
 RUN java -version
 RUN javac -version
 
-## Download Graal 20.2.0
+## Download Graal 21.1.0
 WORKDIR /graalvm
-RUN wget https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-20.2.0/graalvm-ce-java8-linux-amd64-20.2.0.tar.gz
-RUN tar xvzf graalvm-ce-java8-linux-amd64-20.2.0.tar.gz
-ENV JAVA_HOME=/graalvm/graalvm-ce-java8-20.2.0/
+RUN wget https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-21.1.0/graalvm-ce-java8-linux-aarch64-21.1.0.tar.gz
+RUN tar xvzf graalvm-ce-java8-linux-amd64-21.1.0.tar.gz
+ENV JAVA_HOME=/graalvm/graalvm-ce-java8-21.1.0/
 
 ## Download NodeJS NPM packages
 RUN $JAVA_HOME/bin/npm install express
@@ -32,7 +32,6 @@ RUN $JAVA_HOME/bin/npm install jimp
 ## Compile TornadoVM
 WORKDIR /tornado
 RUN git clone https://github.com/beehive-lab/TornadoVM.git tornado
-ENV JAVA_HOME=/graalvm/graalvm-ce-java8-20.2.0/
 ENV PATH /tornado/tornado/bin/bin:$PATH
 ENV PATH $JAVA_HOME/bin:$PATH
 ENV TORNADO_SDK /tornado/tornado/bin/sdk
