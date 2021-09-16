@@ -16,10 +16,10 @@ RUN java -version
 RUN javac -version
 
 ## Download JDK8-JVMCI binary
-WORKDIR /tornado/jdk/jvmci-21.1
-RUN wget https://github.com/graalvm/graal-jvmci-8/releases/download/jvmci-21.1-b05/openjdk-8u292+09-jvmci-21.1-b05-linux-amd64.tar.gz
-RUN tar xvzf openjdk-8u292+09-jvmci-21.1-b05-linux-amd64.tar.gz
-ENV JAVA_HOME /tornado/jdk/jvmci-21.1/openjdk1.8.0_292-jvmci-21.1-b05
+WORKDIR /tornado/jdk/jvmci-21.2
+RUN wget https://github.com/graalvm/graal-jvmci-8/releases/download/jvmci-21.2-b08/openjdk-8u302+07-jvmci-21.2-b08-linux-amd64.tar.gz
+RUN tar xvzf openjdk-8u302+07-jvmci-21.2-b08-linux-amd64.tar.gz
+ENV JAVA_HOME /tornado/jdk/jvmci-21.2/openjdk1.8.0_302-jvmci-21.2-b08
 
 COPY settings/settings.xml /root/.m2/settings.xml
 

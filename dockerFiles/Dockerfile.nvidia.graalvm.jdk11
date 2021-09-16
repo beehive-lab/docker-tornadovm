@@ -1,4 +1,4 @@
-## Docker File for TornadoVM on NVIDIA GPUs using GraalVM 21.1.0 JDK11
+## Docker File for TornadoVM on NVIDIA GPUs using GraalVM 21.2.0 JDK11
 ## OpenCL Backend only
 
 FROM nvidia/opencl
@@ -21,11 +21,11 @@ RUN javac -version
 
 ENV PATH /usr/lib/jvm/java-11-openjdk-amd64/bin:$PATH
 
-## Download Graal 21.1.0
+## Download Graal 21.2.0
 WORKDIR /graalvm
-RUN wget https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-21.1.0/graalvm-ce-java11-linux-amd64-21.1.0.tar.gz
-RUN tar xvzf graalvm-ce-java11-linux-amd64-21.1.0.tar.gz
-ENV JAVA_HOME=/graalvm/graalvm-ce-java11-21.1.0/
+RUN wget https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-21.2.0/graalvm-ce-java11-linux-amd64-21.2.0.tar.gz
+RUN tar xvzf graalvm-ce-java11-linux-amd64-21.2.0.tar.gz
+ENV JAVA_HOME=/graalvm/graalvm-ce-java11-21.2.0/
 RUN $JAVA_HOME/bin/gu install nodejs
 
 ## Download NodeJS NPM packages
