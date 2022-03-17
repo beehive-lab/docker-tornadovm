@@ -1,8 +1,8 @@
 # Docker for TornadoVM
 
-![](https://img.shields.io/docker/pulls/beehivelab/tornado-gpu.svg?color=green&label=docker%20pulls%20nvidia%20jdk8) ![](https://img.shields.io/docker/pulls/beehivelab/tornado-gpu-graalvm-jdk8.svg?color=green&label=docker%20pulls%20nvidia%20graal%20jdk8) ![](https://img.shields.io/docker/pulls/beehivelab/tornado-gpu-graalvm-jdk11.svg?color=green&label=docker%20pulls%20nvidia%20graal%20jdk11)
+![](https://img.shields.io/docker/pulls/beehivelab/tornado-gpu.svg?color=green&label=docker%20pulls%20nvidia%20jdk11) ![](https://img.shields.io/docker/pulls/beehivelab/tornado-gpu-graalvm-jdk11.svg?color=green&label=docker%20pulls%20nvidia%20graal%20jdk11)
 
-![](https://img.shields.io/docker/pulls/beehivelab/tornado-intel-gpu.svg?color=blue&label=docker%20pulls%20intel%20jdk8)  ![](https://img.shields.io/docker/pulls/beehivelab/tornado-intel-igpu-graalvm-jdk8.svg?color=blue&label=docker%20pulls%20intel%20graal%20jdk8)  ![](https://img.shields.io/docker/pulls/beehivelab/tornado-intel-igpu-graalvm-jdk11.svg?color=blue&label=docker%20pulls%20intel%20graal%20jdk11)  
+![](https://img.shields.io/docker/pulls/beehivelab/tornado-intel-gpu.svg?color=blue&label=docker%20pulls%20intel%20jdk11) ![](https://img.shields.io/docker/pulls/beehivelab/tornado-intel-igpu-graalvm-jdk11.svg?color=blue&label=docker%20pulls%20intel%20graal%20jdk11)  
 
 [![](https://img.shields.io/badge/License-Apache%202.0-orange.svg)](https://opensource.org/licenses/Apache-2.0)
 
@@ -32,7 +32,7 @@ For the `nvidia` image:
 $ docker pull beehivelab/tornado-gpu:latest
 ```
 
-This image uses the latest TornadoVM for NVIDIA GPUs and OpenJDK 8.
+This image uses the latest TornadoVM for NVIDIA GPUs and OpenJDK 11.
 
 2) Run an experiment
 
@@ -92,7 +92,7 @@ For the `intel-gpu` image:
 $ docker pull beehivelab/tornado-intel-gpu:latest
 ```
 
-This image uses the latest TornadoVM for Intel integrated graphics and OpenJDK 8.
+This image uses the latest TornadoVM for Intel integrated graphics and OpenJDK 11.
 
 2) Run an experiment
 
