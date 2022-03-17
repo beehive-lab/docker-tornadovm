@@ -1,50 +1,38 @@
 ## Docker File for TornadoVM on NVIDIA GPUs
-## Adapted for TornadoVM v0.8
+## Adapted for TornadoVM v0.13
 FROM nvidia/opencl
 
 LABEL MAINTAINER Juan Fumero <juan.fumero@manchester.ac.uk>
 
-RUN apt-get update
-RUN apt-get install vim git cmake -y
-RUN apt-get install maven wget -y
-RUN apt-get install openjdk-8-jdk -y 
 RUN apt-get update -q && apt-get install -qy \
-    python-pip \
-    && rm -rf /var/lib/apt/lists/*
+        python-pip build-essential vim git cmake maven openjdk-11-jdk \
+        wget && rm -rf /var/lib/apt/lists/*
+
+COPY settings/settings.xml /root/.m2/settings.xml
 
 RUN java -version
 RUN javac -version
 
-## Download JDK8-JVMCI binary
-WORKDIR /tornado/jdk/jvmci-21.2
-RUN wget https://github.com/graalvm/graal-jvmci-8/releases/download/jvmci-21.2-b08/openjdk-8u302+07-jvmci-21.2-b08-linux-amd64.tar.gz
-RUN tar xvzf openjdk-8u302+07-jvmci-21.2-b08-linux-amd64.tar.gz
-ENV JAVA_HOME /tornado/jdk/jvmci-21.2/openjdk1.8.0_302-jvmci-21.2-b08
+ENV PATH /usr/lib/jvm/java-11-openjdk-amd64/bin:$PATH
+ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64
 
 COPY settings/settings.xml /root/.m2/settings.xml
-
-## Compile Tornado
-WORKDIR /tornado
+WORKDIR /tornado/
 RUN git clone https://github.com/beehive-lab/TornadoVM.git tornado
-ENV PATH /tornado/tornado/bin/bin:$PATH
-ENV PATH $JAVA_HOME/bin:$PATH
-ENV CMAKE_ROOT=/usr/
-ENV TORNADO_SDK /tornado/tornado/bin/sdk
 WORKDIR /tornado/tornado
-RUN ./bin/compile.sh jdk-8 opencl
+ENV CMAKE_ROOT=/usr
+RUN ./scripts/tornadoVMInstaller.sh --jdk11 --opencl
+SHELL ["/bin/bash", "-c", "source /tornado/tornado/source.sh"]
 
-
-# Tornado ENV-Variables
-ENV PATH /tornado/tornado/bin/bin:$PATH
-ENV PATH $JAVA_HOME/bin:$PATH
-ENV TORNADO_SDK /tornado/tornado/bin/sdk 
-
-# CUDA-OpenCL ENV-variables
-ENV CPLUS_INCLUDE_PATH /usr/local/cuda/include
-ENV LD_LIBRARY_PATH /usr/local/cuda/lib64
-ENV PATH /usr/local/cuda/bin/:$PATH
+## ENV-Variables Taken from the SOURCE.sh
+ENV JAVA_HOME=/tornado/tornado/TornadoVM-OpenJDK11/jdk-11.0.13+8
+ENV PATH=/tornado/tornado/bin/bin:$PATH
+ENV TORNADO_SDK=/tornado/tornado/bin/sdk
+ENV CMAKE_ROOT=/tornado/tornado/TornadoVM-OpenJDK11/cmake-3.22.1-linux-x86_64/
+ENV TORNADO_ROOT=/tornado/tornado 
 
 WORKDIR /data
 VOLUME ["/data"]
+EXPOSE 3000 
 
 RUN echo "TornadoVM Docker BUILD for NVIDIA GPUs done"

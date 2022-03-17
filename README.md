@@ -6,18 +6,16 @@
 
 [![](https://img.shields.io/badge/License-Apache%202.0-orange.svg)](https://opensource.org/licenses/Apache-2.0)
 
-We have two docker configurations for TornadoVM using 3 different JDKs:
+We have two docker configurations for TornadoVM using 2 different JDKs:
 
 * TornadoVM Docker for **NVIDIA GPUs**: See [instructions](https://github.com/beehive-lab/docker-tornado#nvidia-gpus)
     * JDKs supported:
-	    * TornadoVM with OpenJDK 8 
-		* TornadoVM with GraalVM 20.2 and JDK 8 
-		* TornadoVM with GraalVM 20.2 and JDK 11
+	    * TornadoVM with OpenJDK 11
+		* TornadoVM with GraalVM 21.3.0 and JDK 11
 * TornadoVM Docker for **Intel Integrated Graphics**: See [instructions](https://github.com/beehive-lab/docker-tornado#intel-intergrated-graphics)
     * JDKs supported:
-	    * TornadoVM with OpenJDK 8 
-		* TornadoVM with GraalVM 20.2 and JDK 8 
-		* TornadoVM with GraalVM 20.2 and JDK 11
+	    * TornadoVM with OpenJDK 11
+		* TornadoVM with GraalVM 21.3.0 and JDK 11
 
 ## Nvidia GPUs
 
@@ -56,12 +54,6 @@ Computing MxM of 2048x2048
 ```
 
 ### Using TornadoVM with GraalVM for NVIDIA GPUs
-
-With JDK 8:
-
-```bash
-$ docker pull beehivelab/tornado-gpu-graalvm-jdk8:latest
-```
 
 With JDK 11:
 
@@ -124,17 +116,12 @@ Computing MxM of 256x256
 
 ### Using TornadoVM with GraalVM for Intel Integrated Graphics
 
-With JDK 8:
-
-```bash
-$ docker pull beehivelab/tornado-intel-igpu-graalvm-jdk8:latest
-```
-
 With JDK 11:
 
 ```bash
 $ docker pull beehivelab/tornado-intel-igpu-graalvm-jdk11:latest
 ```
+
 
 Enjoy Tornado!! 
 
