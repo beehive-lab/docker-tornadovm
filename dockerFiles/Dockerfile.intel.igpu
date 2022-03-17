@@ -3,8 +3,10 @@ FROM intelopencl/intel-opencl:ubuntu-18.04-ppa
 LABEL MAINTAINER Juan Fumero <juan.fumero@manchester.ac.uk>
 
 RUN apt-get update -q && apt-get install -qy \
-        python-pip build-essential vim git cmake maven openjdk-11-jdk \
+        python3 build-essential vim git cmake maven openjdk-11-jdk \
         wget && rm -rf /var/lib/apt/lists/*
+
+RUN ln -s /usr/bin/python3 /usr/bin/python
 
 ## OpenCL configuration
 RUN apt-get update && apt-get install -y opencl-headers
