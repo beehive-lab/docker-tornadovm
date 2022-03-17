@@ -5,8 +5,10 @@ FROM nvidia/opencl
 LABEL MAINTAINER Juan Fumero <juan.fumero@manchester.ac.uk>
 
 RUN apt-get update -q && apt-get install -qy \
-        python-pip build-essential vim git cmake maven openjdk-11-jdk \
+        python3 build-essential vim git cmake maven openjdk-11-jdk \
         wget && rm -rf /var/lib/apt/lists/*
+
+RUN ln -s /usr/bin/python3 /usr/bin/python
 
 COPY settings/settings.xml /root/.m2/settings.xml
 
