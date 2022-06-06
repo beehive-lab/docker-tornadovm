@@ -17,13 +17,13 @@ We have two docker configurations for TornadoVM using 2 different JDKs:
 
 ### Prerequisites
 
-The `tornado-gpu` docker image needs the docker `nvidia` daemon.  More info here: [https://github.com/NVIDIA/nvidia-docker](https://github.com/NVIDIA/nvidia-docker).
+The `tornadovm-nvidia-openjdk` docker image needs the docker `nvidia` daemon.  More info here: [https://github.com/NVIDIA/nvidia-docker](https://github.com/NVIDIA/nvidia-docker).
 
 ### How to run?
 
 1) Pull the image
 
-For the `nvidia` image:
+For the `tornadovm-nvidia-openjdk` image:
 ```bash
 $ docker pull beehivelab/tornadovm-nvidia-openjdk:latest
 ```
@@ -75,13 +75,13 @@ $ ./run_nvidia.sh tornado -Xmx16g -Xms16g example/MatrixMultiplication
 
 ### Prerequisites
 
-The `tornado-intel-gpu` docker image Intel OpenCL driver for the integrated GPU installed.  More info here: [https://github.com/intel/compute-runtime](https://github.com/intel/compute-runtime).
+The `beehivelab/tornadovm-intel-openjdk` docker image Intel OpenCL driver for the integrated GPU installed.  More info here: [https://github.com/intel/compute-runtime](https://github.com/intel/compute-runtime).
 
 ### How to run?
 
 1) Pull the image
 
-For the `intel-gpu` image:
+For the `beehivelab/tornadovm-intel-openjdk` image:
 ```bash
 $ docker pull beehivelab/tornadovm-intel-openjdk:latest
 ```
@@ -97,10 +97,8 @@ $ git clone https://github.com/beehive-lab/docker-tornado
 $ cd docker-tornado
 
 ## Run Matrix Multiplication - provided in the docker-tornado repository
-$ ./run_intel_openjdk.sh tornado -cp example/target/example-1.0-SNAPSHOT.jar example.MatrixMultiplication
+$ ./run_intel_openjdk.sh tornado -cp example/target/example-1.0-SNAPSHOT.jar example.MatrixMultiplication 256
 
-## Run with TornadoVM on the Intel Intergrated GPU !
-$ ./run_intel.sh tornado example/MatrixMultiplication 256   ## Running on Intel(R) Gen9 HD Graphics
 Computing MxM of 256x256
 	CPU Execution: 1.53 GFlops, Total time = 22 ms
 	GPU Execution: 8.39 GFlops, Total Time = 4 ms
