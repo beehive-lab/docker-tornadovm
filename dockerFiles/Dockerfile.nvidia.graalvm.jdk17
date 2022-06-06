@@ -22,6 +22,13 @@ ENV JAVA_HOME /usr/lib/jvm/java-17-openjdk-amd64
 RUN java -version
 RUN javac -version
 
+## Download Maven
+WORKDIR /tornado/
+RUN wget https://dlcdn.apache.org/maven/maven-3/3.8.5/binaries/apache-maven-3.8.5-bin.tar.gz
+RUN tar xvzf apache-maven-3.8.5-bin.tar.gz
+ENV PATH=/tornado/apache-maven-3.8.5/bin:$PATH
+ENV CLASSPATH=/tornado/apache-maven-3.8.5/lib:$CLASSPATH
+
 ## Install TornadoVM 
 COPY settings/settings.xml /root/.m2/settings.xml
 WORKDIR /tornado/
