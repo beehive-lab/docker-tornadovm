@@ -33,7 +33,7 @@ WORKDIR /tornado/
 RUN git clone https://github.com/beehive-lab/TornadoVM.git tornado
 WORKDIR /tornado/tornado
 ENV CMAKE_ROOT=/usr
-RUN ./scripts/tornadoVMInstaller.sh --jdk17 --opencl --spirv
+RUN ./scripts/tornadoVMInstaller.sh --graal-jdk-17 --opencl --spirv
 SHELL ["/bin/bash", "-c", "source /tornado/tornado/source.sh"]
 
 ## ENV-Variables Taken from the SOURCE.sh
