@@ -25,7 +25,7 @@ The `tornado-gpu` docker image needs the docker `nvidia` daemon.  More info here
 
 For the `nvidia` image:
 ```bash
-$ docker pull beehivelab/tornado-gpu:latest
+$ docker pull beehivelab/tornadovm-nvidia-openjdk:latest
 ```
 
 This image uses the latest TornadoVM for NVIDIA GPUs and OpenJDK 17.
@@ -38,11 +38,9 @@ We provide a runner script that compiles and run your Java programs with Tornado
 $ git clone https://github.com/beehive-lab/docker-tornado
 $ cd docker-tornado
 
-## Compile Matrix Multiplication - provided in the docker-tornado repository
-$ ./run_nvidia.sh javac.py example/MatrixMultiplication.java
+## Run Matrix Multiplication - provided in the docker-tornado repository
+$ ./run_nvidia_openjdk.sh tornado -cp example/target/example-1.0-SNAPSHOT.jar example.MatrixMultiplication
 
-## Run with TornadoVM on the NVIDIA GPU !
-$ ./run_nvidia.sh tornado example/MatrixMultiplication 2048   ## Running on NVIDIA GP100
 Computing MxM of 2048x2048
 	CPU Execution: 0.36 GFlops, Total time = 48254 ms
 	GPU Execution: 277.09 GFlops, Total Time = 62 ms
@@ -54,7 +52,7 @@ Computing MxM of 2048x2048
 With JDK 17:
 
 ```bash
-$ docker pull beehivelab/tornado-gpu-graalvm-jdk17:latest
+$ docker pull beehivelab/tornadovm-nvidia-graalvm:latest
 ```
 
 ### Some options
@@ -85,7 +83,7 @@ The `tornado-intel-gpu` docker image Intel OpenCL driver for the integrated GPU 
 
 For the `intel-gpu` image:
 ```bash
-$ docker pull beehivelab/tornado-intel-gpu:latest
+$ docker pull beehivelab/tornadovm-intel-openjdk:latest
 ```
 
 This image uses the latest TornadoVM for Intel integrated graphics and OpenJDK 17.
@@ -98,8 +96,8 @@ We provide a runner script that compiles and run your Java programs with Tornado
 $ git clone https://github.com/beehive-lab/docker-tornado
 $ cd docker-tornado
 
-## Compile Matrix Multiplication - provided in the docker-tornado repository
-$ ./run_intel.sh javac.py example/MatrixMultiplication.java
+## Run Matrix Multiplication - provided in the docker-tornado repository
+$ ./run_intel_openjdk.sh tornado -cp example/target/example-1.0-SNAPSHOT.jar example.MatrixMultiplication
 
 ## Run with TornadoVM on the Intel Intergrated GPU !
 $ ./run_intel.sh tornado example/MatrixMultiplication 256   ## Running on Intel(R) Gen9 HD Graphics
@@ -107,7 +105,6 @@ Computing MxM of 256x256
 	CPU Execution: 1.53 GFlops, Total time = 22 ms
 	GPU Execution: 8.39 GFlops, Total Time = 4 ms
 	Speedup: 5x
-
 ```
 
 ### Using TornadoVM with GraalVM for Intel Integrated Graphics
@@ -115,7 +112,7 @@ Computing MxM of 256x256
 With JDK 17:
 
 ```bash
-$ docker pull beehivelab/tornado-intel-igpu-graalvm-jdk17:latest
+$ docker pull beehivelab/tornadovm-intel-graalvm:latest
 ```
 
 
