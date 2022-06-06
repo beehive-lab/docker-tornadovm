@@ -1,5 +1,5 @@
 ## Docker File for TornadoVM on NVIDIA GPUs
-## Adapted for TornadoVM v0.13
+## Adapted for TornadoVM v0.14
 FROM nvidia/opencl
 
 LABEL MAINTAINER Juan Fumero <juan.fumero@manchester.ac.uk>
@@ -23,7 +23,7 @@ WORKDIR /tornado/
 RUN git clone https://github.com/beehive-lab/TornadoVM.git tornado
 WORKDIR /tornado/tornado
 ENV CMAKE_ROOT=/usr
-RUN ./scripts/tornadoVMInstaller.sh --jdk17 --opencl --ptx
+RUN ./scripts/tornadoVMInstaller.sh --jdk17 --opencl 
 SHELL ["/bin/bash", "-c", "source /tornado/tornado/source.sh"]
 
 ## ENV-Variables Taken from the SOURCE.sh
