@@ -2,11 +2,11 @@
 
 platform=$1
 
-if [ -v $1 ];then
-    echo "BUILDING DOCKER IMAGES FOR THE $1 PLATFORM"
-else
+if [ -z "$1" ];then
     platform="intel"
     echo "BUILDING DOCKER IMAGES FOR THE $platform PLATFORM"
+else
+    echo "BUILDING DOCKER IMAGES FOR THE $1 PLATFORM"
 fi
 
 if [[ $platform == "intel" ]]; then
@@ -32,4 +32,6 @@ elif [[ $platform == "nvidia" ]]; then
     ./run_nvidia_graalvm.sh tornado --version
     ./run_nvidia_graalvm.sh tornado -version
     ./run_nvidia_graalvm.sh tornado --threadInfo -cp example/target/example-1.0-SNAPSHOT.jar example.MatrixMultiplication
+else 
+    echo "Use <intel> or <nvidia>"
 fi

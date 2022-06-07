@@ -7,11 +7,11 @@ We have two docker configurations for TornadoVM using 2 different JDKs:
 * TornadoVM Docker for **NVIDIA GPUs**: See [instructions](https://github.com/beehive-lab/docker-tornado#nvidia-gpus)
     * JDKs supported:
 	    * TornadoVM with OpenJDK 17
-		* TornadoVM with GraalVM 21.3.0 and JDK 17
+		* TornadoVM with GraalVM 22.1.0 and JDK 17
 * TornadoVM Docker for **Intel Integrated Graphics, Intel CPUs, and Intel FPGAs (Emulated Mode)**: See [instructions](https://github.com/beehive-lab/docker-tornado#intel-intergrated-graphics)
     * JDKs supported:
 	    * TornadoVM with OpenJDK 17
-		* TornadoVM with GraalVM 21.3.0 and JDK 17
+		* TornadoVM with GraalVM 22.1.0 and JDK 17
 
 ## Nvidia GPUs
 
