@@ -42,6 +42,7 @@ ENV PATH=/tornado/tornado/bin/bin:$PATH
 ENV TORNADO_SDK=/tornado/tornado/bin/sdk
 ENV CMAKE_ROOT=/tornado/tornado/etc/dependencies/TornadoVM-OpenJDK17/cmake-3.22.1-linux-x86_64/
 ENV TORNADO_ROOT=/tornado/tornado 
+ENV DOCKER_FPGA_EMULATION=1 
 
 ## Download NodeJS NPM packages
 RUN $JAVA_HOME/bin/gu install nodejs
