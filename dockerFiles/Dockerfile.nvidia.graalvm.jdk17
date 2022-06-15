@@ -54,5 +54,3 @@ RUN $JAVA_HOME/bin/npm install jimp
 WORKDIR /data
 VOLUME ["/data"]
 EXPOSE 3000 
-
-RUN echo "TornadoVM BUILD done"

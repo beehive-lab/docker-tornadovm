@@ -43,5 +43,3 @@ ENV TORNADO_ROOT=/tornado/tornado
 WORKDIR /data
 VOLUME ["/data"]
 EXPOSE 3000 
-
-RUN echo "TornadoVM Docker BUILD for NVIDIA GPUs done"

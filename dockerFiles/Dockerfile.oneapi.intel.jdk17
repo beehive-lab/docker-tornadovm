@@ -47,4 +47,3 @@ ENV DOCKER_FPGA_EMULATION=1
 WORKDIR /data
 VOLUME ["/data"]
 
-RUN echo "TornadoVM BUILD done"
