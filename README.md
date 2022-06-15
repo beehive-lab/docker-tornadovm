@@ -105,6 +105,32 @@ Computing MxM of 256x256
 	Speedup: 5x
 ```
 
+### Running on FPGAs (Emulation mode)? 
+
+The TornadoVM docker image for the Intel platforms contain the FPGA in device `1:0`. 
+To offload a Java application onto an FPGA, you can use the following command (example running the DFT application).
+
+```bash
+$ ./run_intel_openjdk.sh tornado --threadInfo  -Ds0.t0.device=1:0 -m tornado.examples/uk.ac.manchester.tornado.examples.dynamic.DFTDynamic 256 default 1
+WARNING: Using incubator modules: jdk.incubator.foreign, jdk.incubator.vector
+Initialization time:  1066024424 ns
+ 
+Task info: s0.t0
+        Backend           : OPENCL
+        Device            : Intel(R) FPGA Emulation Device CL_DEVICE_TYPE_ACCELERATOR (available)
+        Dims              : 1
+        Global work offset: [0]
+        Global work size  : [256]
+        Local  work size  : [64, 1, 1]
+        Number of workgroups  : [4]
+ 
+Total time:  276927741 ns 
+ 
+Is valid?: true
+ 
+Validation: SUCCESS 
+```
+
 ### Using TornadoVM with GraalVM for Intel Integrated Graphics
 
 With JDK 17:
