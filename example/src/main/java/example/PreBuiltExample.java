@@ -16,30 +16,20 @@
  */
 package example;
 
+import uk.ac.manchester.tornado.api.GridScheduler;
 import uk.ac.manchester.tornado.api.TaskSchedule;
-import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.WorkerGrid;
+import uk.ac.manchester.tornado.api.WorkerGrid2D;
+import uk.ac.manchester.tornado.api.common.Access;
+import uk.ac.manchester.tornado.api.common.TornadoDevice;
+import uk.ac.manchester.tornado.api.runtime.TornadoRuntime;
 
 import java.util.Random;
 import java.util.stream.IntStream;
 
-public class MatrixMultiplication {
-
-    public static final int WARMING_UP_ITERATIONS = 15;
-
-    public static void matrixMultiplication(final float[] A, final float[] B, final float[] C, final int size) {
-        for (@Parallel int i = 0; i < size; i++) {
-            for (@Parallel int j = 0; j < size; j++) {
-                float sum = 0.0f;
-                for (int k = 0; k < size; k++) {
-                    sum += A[(i * size) + k] * B[(k * size) + j];
-                }
-                C[(i * size) + j] = sum;
-            }
-        }
-    }
+public class PreBuiltExample {
 
     public static void main(String[] args) {
-
         int size = 512;
         if (args.length >= 1) {
             try {
@@ -48,8 +38,6 @@ public class MatrixMultiplication {
                 size = 512;
             }
         }
-
-        System.out.println("Computing MxM of " + size + "x" + size);
 
         float[] matrixA = new float[size * size];
         float[] matrixB = new float[size * size];
@@ -62,32 +50,42 @@ public class MatrixMultiplication {
             matrixB[idx] = r.nextFloat();
         });
 
-        //@formatter:off
-        TaskSchedule t = new TaskSchedule("s0")
+
+        // Get the default device
+        TornadoDevice device = TornadoRuntime.getTornadoRuntime().getDriver(1).getDevice(1);
+
+        String filePath = "mxm.cl";
+
+        GridScheduler grid = new GridScheduler();
+        WorkerGrid workerGrid = new WorkerGrid2D(size, size);
+        workerGrid.setGlobalWork(size, size, 1);
+        workerGrid.setLocalWork(64, 1, 1);
+        grid.setWorkerGrid("s0.t0", workerGrid);
+
+        TaskSchedule ts = new TaskSchedule("s0")
                 .lockObjectsInMemory(matrixA, matrixB, matrixC)
-                .task("t0", MatrixMultiplication::matrixMultiplication, matrixA, matrixB, matrixC, size)
+                .prebuiltTask("t0",
+                        "matrixMultiplication",
+                        filePath,
+                        new Object[] { matrixA, matrixB, matrixC, size},
+                        new Access[] { Access.READ, Access.READ, Access.WRITE, Access.READ },
+                        device,
+                        new int[] { size, size })
                 .streamOut(matrixC);
-        //@formatter:on
 
         // 1. Warm up Tornado
-        for (int i = 0; i < WARMING_UP_ITERATIONS; i++) {
-            t.execute();
+        for (int i = 0; i < MatrixMultiplication.WARMING_UP_ITERATIONS; i++) {
+            ts.execute(grid);
         }
 
         // 2. Run parallel on the GPU with Tornado
         long start = System.currentTimeMillis();
-        t.execute();
+        ts.execute(grid);
         long end = System.currentTimeMillis();
-
-        // Run sequential
-        // 1. Warm up sequential
-        for (int i = 0; i < WARMING_UP_ITERATIONS; i++) {
-            matrixMultiplication(matrixA, matrixB, resultSeq, size);
-        }
 
         // 2. Run the sequential code
         long startSequential = System.currentTimeMillis();
-        matrixMultiplication(matrixA, matrixB, resultSeq, size);
+        MatrixMultiplication.matrixMultiplication(matrixA, matrixB, resultSeq, size);
         long endSequential = System.currentTimeMillis();
 
         // Compute Gigaflops and performance
@@ -103,6 +101,6 @@ public class MatrixMultiplication {
         System.out.println("\tCPU Execution: " + formatCPUFGlops + " GFlops, Total time = " + (endSequential - startSequential) + " ms");
         System.out.println("\tGPU Execution: " + formatGPUFGlops + " GFlops, Total Time = " + (end - start) + " ms");
         System.out.println("\tSpeedup: " + ((endSequential - startSequential) / (end - start)) + "x");
-    }
 
+    }
 }
