@@ -48,6 +48,7 @@ public class MatrixMultiplication {
 
         //@formatter:off
         TaskSchedule t = new TaskSchedule("s0")
+                .lockObjectsInMemory(matrixA, matrixB, matrixC)
                 .task("t0", MatrixMultiplication::matrixMultiplication, matrixA, matrixB, matrixC, size)
                 .streamOut(matrixC);
         //@formatter:on
