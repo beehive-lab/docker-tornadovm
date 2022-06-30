@@ -27,6 +27,13 @@ import uk.ac.manchester.tornado.api.runtime.TornadoRuntime;
 import java.util.Random;
 import java.util.stream.IntStream;
 
+/**
+ * How to run?
+ *
+ * <code>
+ *     $ ../run_intel_openjdk.sh tornado --threadInfo -cp target/example-1.0-SNAPSHOT.jar example.PreBuiltExample 256
+ * </code>
+ */
 public class PreBuiltExample {
 
     public static void main(String[] args) {
