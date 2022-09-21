@@ -37,7 +37,7 @@ RUN ./scripts/tornadoVMInstaller.sh --graal-jdk-17 --opencl --spirv
 SHELL ["/bin/bash", "-c", "source /tornado/tornado/source.sh"]
 
 ## ENV-Variables Taken from the SOURCE.sh
-ENV JAVA_HOME=/tornado/tornado/etc/dependencies/TornadoVM-GraalJDK17/graalvm-ce-java17-22.1.0
+ENV JAVA_HOME=/tornado/tornado/etc/dependencies/TornadoVM-GraalJDK17/graalvm-ce-java17-22.2.0
 ENV PATH=/tornado/tornado/bin/bin:$PATH
 ENV TORNADO_SDK=/tornado/tornado/bin/sdk
 ENV CMAKE_ROOT=/tornado/tornado/etc/dependencies/TornadoVM-OpenJDK17/cmake-3.22.1-linux-x86_64/
