@@ -38,7 +38,7 @@ We provide a runner script that compiles and run your Java programs with Tornado
 $ git clone https://github.com/beehive-lab/docker-tornado
 $ cd docker-tornado
 
-## Run Matrix Multiplication - provided in the docker-tornado repository
+## Run Matrix Multiplication - provided in the docker-tornado repositoryu
 $ ./run_nvidia_openjdk.sh tornado -cp example/target/example-1.0-SNAPSHOT.jar example.MatrixMultiplication
 
 Computing MxM of 2048x2048
@@ -68,7 +68,7 @@ $ ./run_nvidia.sh tornado --debug example/MatrixMultiplication
 The `tornado` command is just an alias to the `java` command with all the parameters for TornadoVM execution. So you can pass any Java (OpenJDK or Hotspot) parameter.
 
 ```bash
-$ ./run_nvidia.sh tornado -Xmx16g -Xms16g example/MatrixMultiplication
+$ ./run_nvidia.sh tornado --jvm="-Xmx16g -Xms16g" example/MatrixMultiplication
 ```
 
 ## Intel Integrated Graphics
@@ -97,7 +97,7 @@ $ git clone https://github.com/beehive-lab/docker-tornado
 $ cd docker-tornado
 
 ## Run Matrix Multiplication - provided in the docker-tornado repository
-$ ./run_intel_openjdk.sh tornado -cp example/target/example-1.0-SNAPSHOT.jar example.MatrixMultiplication 256
+$ ./run_intel_openjdk.sh tornado -cp example/target/example-1.0-SNAPSHOT.jar example.MatrixMultiplication --params "256"
 
 Computing MxM of 256x256
 	CPU Execution: 1.53 GFlops, Total time = 22 ms
@@ -111,7 +111,7 @@ The TornadoVM docker image for the Intel platforms contain the FPGA in device `1
 To offload a Java application onto an FPGA, you can use the following command (example running the DFT application).
 
 ```bash
-$ ./run_intel_openjdk.sh tornado --threadInfo  -Ds0.t0.device=1:0 -m tornado.examples/uk.ac.manchester.tornado.examples.dynamic.DFTDynamic 256 default 1
+$ ./run_intel_openjdk.sh tornado --threadInfo  --jvm="-Ds0.t0.device=1:0" -m tornado.examples/uk.ac.manchester.tornado.examples.dynamic.DFTDynamic --params="256 default 1"
 WARNING: Using incubator modules: jdk.incubator.foreign, jdk.incubator.vector
 Initialization time:  1066024424 ns
  
