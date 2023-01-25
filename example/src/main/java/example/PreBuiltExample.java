@@ -16,13 +16,19 @@
  */
 package example;
 
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.TornadoExecutionResult;
+import uk.ac.manchester.tornado.api.TornadoProfilerResult;
 import uk.ac.manchester.tornado.api.GridScheduler;
-import uk.ac.manchester.tornado.api.TaskSchedule;
+import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.WorkerGrid;
 import uk.ac.manchester.tornado.api.WorkerGrid2D;
 import uk.ac.manchester.tornado.api.common.Access;
 import uk.ac.manchester.tornado.api.common.TornadoDevice;
 import uk.ac.manchester.tornado.api.runtime.TornadoRuntime;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
 
 import java.util.Random;
 import java.util.stream.IntStream;
@@ -69,8 +75,8 @@ public class PreBuiltExample {
         workerGrid.setLocalWork(64, 1, 1);
         grid.setWorkerGrid("s0.t0", workerGrid);
 
-        TaskSchedule ts = new TaskSchedule("s0")
-                .lockObjectsInMemory(matrixA, matrixB, matrixC)
+        TaskGraph ts = new TaskGraph("s0")
+                .transferToHost(DataTransferMode.FIRST_EXECUTION, matrixA, matrixB)
                 .prebuiltTask("t0",
                         "matrixMultiplication",
                         filePath,
@@ -78,16 +84,19 @@ public class PreBuiltExample {
                         new Access[] { Access.READ, Access.READ, Access.WRITE, Access.READ },
                         device,
                         new int[] { size, size })
-                .streamOut(matrixC);
+                .transferToHost(DataTransferMode.EVERY_EXECUTION, matrixC);
+
+        TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(ts.snapshot());
+        executionPlan.withGridScheduler(grid);
 
         // 1. Warm up Tornado
         for (int i = 0; i < MatrixMultiplication.WARMING_UP_ITERATIONS; i++) {
-            ts.execute(grid);
+            executionPlan.execute();
         }
 
         // 2. Run parallel on the GPU with Tornado
         long start = System.currentTimeMillis();
-        ts.execute(grid);
+        executionPlan.execute();
         long end = System.currentTimeMillis();
 
         // 2. Run the sequential code

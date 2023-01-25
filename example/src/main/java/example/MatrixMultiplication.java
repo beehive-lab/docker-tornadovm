@@ -16,11 +16,13 @@
  */
 package example;
 
-import uk.ac.manchester.tornado.api.TaskSchedule;
-import uk.ac.manchester.tornado.api.annotations.Parallel;
-
 import java.util.Random;
 import java.util.stream.IntStream;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
 
 public class MatrixMultiplication {
 
@@ -62,21 +64,22 @@ public class MatrixMultiplication {
             matrixB[idx] = r.nextFloat();
         });
 
-        //@formatter:off
-        TaskSchedule t = new TaskSchedule("s0")
-                .lockObjectsInMemory(matrixA, matrixB, matrixC)
+        TaskGraph t = new TaskGraph("s0")
+                .transferToDevice(DataTransferMode.FIRST_EXECUTION, matrixA, matrixB)
                 .task("t0", MatrixMultiplication::matrixMultiplication, matrixA, matrixB, matrixC, size)
-                .streamOut(matrixC);
-        //@formatter:on
+                .transferToHost(DataTransferMode.EVERY_EXECUTION, matrixC);
+
+		ImmutableTaskGraph immutableTaskGraph = t.snapshot();
+		TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph);
 
         // 1. Warm up Tornado
         for (int i = 0; i < WARMING_UP_ITERATIONS; i++) {
-            t.execute();
+            executionPlan.execute();
         }
 
         // 2. Run parallel on the GPU with Tornado
         long start = System.currentTimeMillis();
-        t.execute();
+        executionPlan.execute();
         long end = System.currentTimeMillis();
 
         // Run sequential
