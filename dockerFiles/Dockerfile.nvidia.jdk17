@@ -30,7 +30,7 @@ RUN ./scripts/tornadovm-installer --jdk jdk17 --backend opencl
 SHELL ["/bin/bash", "-c", "source /tornado/tornado/source.sh"]
 
 ## ENV-Variables Taken from the SOURCE.sh
-ENV JAVA_HOME=/tornado/tornado/etc/dependencies/TornadoVM-jdk17/jdk-17.0.6
+ENV JAVA_HOME=/tornado/tornado/etc/dependencies/TornadoVM-jdk17/jdk-17.0.7
 ENV PATH=/tornado/tornado/bin/bin:$PATH
 ENV TORNADO_SDK=/tornado/tornado/bin/sdk
 ENV TORNADO_ROOT=/tornado/tornado 
