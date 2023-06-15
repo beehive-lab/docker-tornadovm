@@ -1,0 +1,51 @@
+FROM nvidia/cuda:12.1.1-devel-ubuntu20.04
+
+LABEL MAINTAINER Juan Fumero <juan.fumero@manchester.ac.uk>
+
+ENV TZ=Europe/Rome
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+RUN apt-get update -q && apt-get install -qy \
+        python3 build-essential vim git cmake maven openjdk-17-jdk python3-pip \
+        wget && rm -rf /var/lib/apt/lists/*
+
+RUN python3 -m pip install wget
+
+RUN ln -s /usr/bin/python3 /usr/bin/python
+
+COPY settings/settings.xml /root/.m2/settings.xml
+
+RUN java -version
+RUN javac -version
+
+ENV PATH /usr/lib/jvm/java-17-openjdk-amd64/bin:$PATH
+ENV JAVA_HOME /usr/lib/jvm/java-17-openjdk-amd64
+
+RUN java -version
+RUN javac -version
+
+## Install TornadoVM 
+WORKDIR /tornado/
+COPY settings/settings.xml /root/.m2/settings.xml
+WORKDIR /tornado/
+RUN git clone https://github.com/beehive-lab/TornadoVM.git tornado
+WORKDIR /tornado/tornado
+ENV CMAKE_ROOT=/usr
+RUN ./scripts/tornadovm-installer --jdk graalvm-jdk-17 --backend ptx 
+SHELL ["/bin/bash", "-c", "source /tornado/tornado/source.sh"]
+
+## ENV-Variables Taken from the SOURCE.sh
+ENV JAVA_HOME=/tornado/tornado/etc/dependencies/TornadoVM-graalvm-jdk-17/graalvm-ce-java17-22.3.1
+ENV PATH=/tornado/tornado/bin/bin:$PATH
+ENV TORNADO_SDK=/tornado/tornado/bin/sdk
+ENV TORNADO_ROOT=/tornado/tornado 
+
+## Download NodeJS NPM packages
+RUN $JAVA_HOME/bin/gu install nodejs
+RUN $JAVA_HOME/bin/npm install express
+RUN $JAVA_HOME/bin/npm install jimp
+
+## Final Setup
+WORKDIR /data
+VOLUME ["/data"]
+EXPOSE 3000 

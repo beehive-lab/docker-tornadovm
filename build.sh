@@ -18,6 +18,11 @@ function nvidiaGraalVMJDK17() {
     buildDockerImage "tornadovm-nvidia-graalvm" "dockerFiles/Dockerfile.nvidia.graalvm.jdk17"
 }
 
+
+function nvidiaARM() {
+    buildDockerImage "tornadovm-nvidia-graalvm-arm" "dockerFiles/Dockerfile.nvidia.graalvm.ptx.jdk17"
+}
+
 function intelJDK17() {
     buildDockerImage "tornadovm-intel-openjdk" "dockerFiles/Dockerfile.oneapi.intel.jdk17"
 }
@@ -35,6 +40,8 @@ function printHelp() {
     echo -e "\nBuilds for Intel Compute Platforms: Integrated GPUs, Intel CPUs and FPGAs (Emulation Mode)"
     echo "       --intel-jdk17          (OpenCL, SPIR-V): Build Docker Image for Intel Integrated GPUs, Intel CPUs, and Intel FPGAs using JDK17"
     echo "       --intel-graalVM-JDK17  (OpenCL, SPIR-V): Build Docker Image for Intel Integrated GPUs, Intel CPUs, and Intel FPGAs using GraalVM JDK17"
+    echo "Builds for NVIDIA-ARM Compute Platforms: GPUs"
+    echo "       --nvidia-arm-graalVM-JDK17 (PTX): Build Docker Image for NVIDIA GPUs using GraalVM JDK11"
     exit 0
 }
 
@@ -67,6 +74,10 @@ while [[ $# -gt 0 ]]; do
     ;;
   --intel-graalVM-JDK17)
     intelGraalVMJDK17
+    shift
+    ;;
+ --nvidia-arm-graalVM-JDK17)
+    nvidiaARM
     shift
     ;;
   esac
