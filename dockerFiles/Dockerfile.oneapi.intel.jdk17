@@ -6,7 +6,7 @@ RUN apt-get update && apt-get install -y python3 build-essential vim git cmake m
 
 RUN python3 -m pip install wget
 
-RUN ln -s /usr/bin/python3 /usr/bin/python1
+RUN ln -s /usr/bin/python3 /usr/bin/python
 
 ## OpenCL configuration
 RUN apt-get update && apt-get install -y opencl-headers
