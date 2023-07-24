@@ -4,11 +4,11 @@
 
 We have two docker configurations for TornadoVM using 2 different JDKs:
 
-* TornadoVM Docker for **NVIDIA GPUs**: See [instructions](https://github.com/beehive-lab/docker-tornado#nvidia-gpus)
+* TornadoVM Docker for **NVIDIA GPUs**: See [instructions](https://github.com/beehive-lab/docker-tornadovm#nvidia-gpus)
     * JDKs supported:
 	    * TornadoVM with OpenJDK 17
 		* TornadoVM with GraalVM 22.3.1 and JDK 17
-* TornadoVM Docker for **Intel Integrated Graphics, Intel CPUs, and Intel FPGAs (Emulated Mode)**: See [instructions](https://github.com/beehive-lab/docker-tornado#intel-integrated-graphics)
+* TornadoVM Docker for **Intel Integrated Graphics, Intel CPUs, and Intel FPGAs (Emulated Mode)**: See [instructions](https://github.com/beehive-lab/docker-tornadovm#intel-integrated-graphics)
     * JDKs supported:
 	    * TornadoVM with OpenJDK 17
 		* TornadoVM with GraalVM 22.3.1 and JDK 17
@@ -35,8 +35,8 @@ This image uses the latest TornadoVM for NVIDIA GPUs and OpenJDK 17.
 We provide a runner script that compiles and run your Java programs with Tornado. Here's an example:
 
 ```bash
-$ git clone https://github.com/beehive-lab/docker-tornado
-$ cd docker-tornado
+$ git clone https://github.com/beehive-lab/docker-tornadovm
+$ cd docker-tornadovm
 
 ## Run Matrix Multiplication - provided in the docker-tornado repositoryu
 $ ./run_nvidia_openjdk.sh tornado -cp example/target/example-1.0-SNAPSHOT.jar example.MatrixMultiplication
@@ -93,8 +93,8 @@ This image uses the latest TornadoVM for Intel integrated graphics and OpenJDK 1
 We provide a runner script that compiles and run your Java programs with Tornado. Here's an example:
 
 ```bash
-$ git clone https://github.com/beehive-lab/docker-tornado
-$ cd docker-tornado
+$ git clone https://github.com/beehive-lab/docker-tornadovm
+$ cd docker-tornadovm
 
 ## Run Matrix Multiplication - provided in the docker-tornado repository
 $ ./run_intel_openjdk.sh tornado -cp example/target/example-1.0-SNAPSHOT.jar example.MatrixMultiplication --params "256"
