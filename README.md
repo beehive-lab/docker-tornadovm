@@ -140,7 +140,7 @@ $ docker pull beehivelab/tornadovm-intel-graalvm:latest
 ```
 
 
-Enjoy Tornado!! 
+Enjoy TornadoVM! 
 
 Docker scripts have been inspired by [blang/latex-docker](https://github.com/blang/latex-docker)
 
