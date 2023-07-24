@@ -32,13 +32,13 @@ This image uses the latest TornadoVM for NVIDIA GPUs and OpenJDK 17.
 
 2) Run an experiment
 
-We provide a runner script that compiles and run your Java programs with Tornado. Here's an example:
+We provide a runner script that compiles and run your Java programs with TornadoVM. Here's an example:
 
 ```bash
 $ git clone https://github.com/beehive-lab/docker-tornadovm
 $ cd docker-tornadovm
 
-## Run Matrix Multiplication - provided in the docker-tornado repositoryu
+## Run Matrix Multiplication - provided in the docker-tornadovm repository
 $ ./run_nvidia_openjdk.sh tornado -cp example/target/example-1.0-SNAPSHOT.jar example.MatrixMultiplication
 
 Computing MxM of 2048x2048
@@ -90,13 +90,13 @@ This image uses the latest TornadoVM for Intel integrated graphics and OpenJDK 1
 
 2) Run an experiment
 
-We provide a runner script that compiles and run your Java programs with Tornado. Here's an example:
+We provide a runner script that compiles and run your Java programs with TornadoVM. Here's an example:
 
 ```bash
 $ git clone https://github.com/beehive-lab/docker-tornadovm
 $ cd docker-tornadovm
 
-## Run Matrix Multiplication - provided in the docker-tornado repository
+## Run Matrix Multiplication - provided in the docker-tornadovm repository
 $ ./run_intel_openjdk.sh tornado -cp example/target/example-1.0-SNAPSHOT.jar example.MatrixMultiplication --params "256"
 
 Computing MxM of 256x256
@@ -147,5 +147,5 @@ Docker scripts have been inspired by [blang/latex-docker](https://github.com/bla
 
 ## License
 
-This project is developed at [The University of Manchester](https://www.manchester.ac.uk/), and it is fully open source under the [Apache 2](https://github.com/beehive-lab/docker-tornado/blob/master/LICENSE) license.
+This project is developed at [The University of Manchester](https://www.manchester.ac.uk/), and it is fully open source under the [Apache 2](https://github.com/beehive-lab/docker-tornadovm/blob/master/LICENSE) license.
 
