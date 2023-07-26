@@ -97,7 +97,7 @@ $ git clone https://github.com/beehive-lab/docker-tornadovm
 $ cd docker-tornadovm
 
 ## Run Matrix Multiplication - provided in the docker-tornadovm repository
-$ ./run_intel_openjdk.sh tornado -cp example/target/example-1.0-SNAPSHOT.jar example.MatrixMultiplication --params "256"
+$ ./run_intel_openjdk.sh tornado -cp example/target/example-1.0-SNAPSHOT.jar example.MatrixMultiplication 256
 
 Computing MxM of 256x256
 	CPU Execution: 1.53 GFlops, Total time = 22 ms
@@ -111,7 +111,7 @@ The TornadoVM docker image for the Intel platforms contain the FPGA in device `1
 To offload a Java application onto an FPGA, you can use the following command (example running the DFT application).
 
 ```bash
-$ ./run_intel_openjdk.sh tornado --threadInfo  --jvm="-Ds0.t0.device=1:0" -m tornado.examples/uk.ac.manchester.tornado.examples.dynamic.DFTDynamic --params="256 default 1"
+$ ./run_intel_openjdk.sh tornado --threadInfo  --jvm="-Ds0.t0.device=1:0" -m tornado.examples/uk.ac.manchester.tornado.examples.dynamic.DFTDynamic 256 default 1
 WARNING: Using incubator modules: jdk.incubator.foreign, jdk.incubator.vector
 Initialization time:  1066024424 ns
  

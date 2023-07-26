@@ -32,7 +32,7 @@ RUN git clone https://github.com/beehive-lab/TornadoVM.git tornado
 WORKDIR /tornado/tornado
 ENV CMAKE_ROOT=/usr
 RUN ./scripts/tornadovm-installer --jdk graalvm-jdk-17 --backend opencl 
-SHELL ["/bin/bash", "-c", "source /tornado/tornado/source.sh"]
+SHELL ["/bin/bash", "-c", "source /tornado/tornado/setvars.sh"]
 
 ## ENV-Variables Taken from the SOURCE.sh
 ENV JAVA_HOME=/tornado/tornado/etc/dependencies/TornadoVM-graalvm-jdk-17/graalvm-ce-java17-22.3.2
