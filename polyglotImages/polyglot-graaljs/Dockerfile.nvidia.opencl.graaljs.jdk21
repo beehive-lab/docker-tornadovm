@@ -1,0 +1,57 @@
+## Docker File for TornadoVM on NVIDIA GPUs using GraalVM 23.1.0 JDK21
+## OpenCL Backend only
+
+FROM ubuntu:22.04
+
+LABEL MAINTAINER Thanos Stratikopoulos <athanasios.stratikopoulos@manchester.ac.uk>
+
+SHELL ["/bin/bash", "-c"]
+
+RUN apt-get update -q && apt-get install -qy \
+        build-essential vim git cmake maven openjdk-17-jdk python3 python3-pip \
+        wget clinfo ocl-icd-opencl-dev opencl-headers && rm -rf /var/lib/apt/lists/*
+
+RUN python3 -m pip install wget
+
+ENV PATH /usr/lib/jvm/java-17-openjdk-amd64/bin:$PATH
+ENV JAVA_HOME /usr/lib/jvm/java-17-openjdk-amd64
+
+# Enable Nvidia OpenCL
+RUN mkdir -p /etc/OpenCL/vendors && \
+    echo "libnvidia-opencl.so.1" > /etc/OpenCL/vendors/nvidia.icd
+ENV NVIDIA_VISIBLE_DEVICES all
+ENV NVIDIA_DRIVER_CAPABILITIES compute,utility
+
+# Install GraalJS
+WORKDIR /graaljs-dev/
+RUN git clone https://github.com/oracle/graal /graaljs-dev/graal && cd /graaljs-dev/graal && git checkout f795ef233f3e325aab46db7241f367b6c88de1b0
+RUN git clone https://github.com/oracle/graaljs.git /graaljs-dev/graaljs && cd /graaljs-dev/graaljs && git checkout graal-23.1.0
+WORKDIR /graaljs-dev/graaljs
+RUN git clone https://github.com/graalvm/mx.git /graaljs-dev/mx
+RUN wget -O /tmp/labsjdk-ce-21.0.1+12-jvmci-23.1-b22-linux-amd64.tar.gz https://github.com/graalvm/labs-openjdk-21/releases/download/jvmci-23.1-b22/labsjdk-ce-21.0.1+12-jvmci-23.1-b22-linux-amd64.tar.gz
+RUN mkdir -p /root/.mx/jdks/ \
+    && tar xzvf /tmp/labsjdk-ce-21.0.1+12-jvmci-23.1-b22-linux-amd64.tar.gz --directory /root/.mx/jdks/
+ENV MX_PYTHON_VERSION=3
+WORKDIR /graaljs-dev/graaljs/graal-js
+ENV JAVA_HOME=/root/.mx/jdks/labsjdk-ce-21.0.1-jvmci-23.1-b22
+RUN /graaljs-dev/mx/mx --dynamicimports /compiler build
+
+## Install TornadoVM 
+WORKDIR /tornado-dev/
+RUN git clone https://github.com/beehive-lab/TornadoVM.git tornado && cd tornado && git checkout master
+WORKDIR /tornado-dev/tornado
+ENV CMAKE_ROOT=/usr
+RUN ./bin/tornadovm-installer --jdk graalvm-jdk-21 --backend opencl --polyglot 
+SHELL ["/bin/bash", "-c", "source /tornado/tornado/setvars.sh"]
+
+## ENV-Variables Taken from the SOURCE.sh
+ENV JAVA_HOME=/tornado-dev/tornado/etc/dependencies/TornadoVM-graalvm-jdk-21/graalvm-community-openjdk-21.0.1+12.1
+ENV PATH=/tornado-dev/tornado/bin/bin:$PATH
+ENV TORNADO_SDK=/tornado-dev/tornado/bin/sdk
+ENV TORNADO_ROOT=/tornado-dev/tornado 
+ENV GRAALJS_HOME=/graaljs-dev/graal/sdk/mxbuild/linux-amd64/GRAALVM_3AF13F6F38_JAVA21/graalvm-3af13f6f38-java21-23.1.0-dev
+
+## Final Setup
+WORKDIR /data
+VOLUME ["/data"]
+EXPOSE 3000 

@@ -1,0 +1,61 @@
+## Docker File for TornadoVM on NVIDIA GPUs using GraalVM 23.1.0 JDK21
+## OpenCL Backend only
+
+FROM ubuntu:22.04
+
+LABEL MAINTAINER Thanos Stratikopoulos <athanasios.stratikopoulos@manchester.ac.uk>
+
+SHELL ["/bin/bash", "-c"]
+
+RUN apt-get update -q && apt-get install -qy \
+        build-essential vim git cmake maven openjdk-17-jdk python3 python3-pip \
+        libyaml-dev make gcc libssl-dev ninja-build \
+        wget clinfo ocl-icd-opencl-dev opencl-headers && rm -rf /var/lib/apt/lists/*
+
+RUN python3 -m pip install wget
+# TruffleRuby dependency
+RUN python3 -m pip install ninja_syntax
+
+ENV PATH /usr/lib/jvm/java-17-openjdk-amd64/bin:$PATH
+ENV JAVA_HOME /usr/lib/jvm/java-17-openjdk-amd64
+
+# Enable Nvidia OpenCLmx/mx --dynamicimports /compiler build
+RUN mkdir -p /etc/OpenCL/vendors && \
+    echo "libnvidia-opencl.so.1" > /etc/OpenCL/vendors/nvidia.icd
+ENV NVIDIA_VISIBLE_DEVICES all
+ENV NVIDIA_DRIVER_CAPABILITIES compute,utility
+
+# Install TruffleRuby
+WORKDIR /truffleruby-dev/
+RUN git clone https://github.com/oracle/graal /truffleruby-dev/graal && cd /truffleruby-dev/graal && git checkout 39e46e0bc2bd49cb52f3c98944253d59d76a21b0
+RUN git clone https://github.com/oracle/truffleruby.git /truffleruby-dev/truffleruby && cd /truffleruby-dev/truffleruby && git checkout graal-23.1.0
+WORKDIR /truffleruby-dev/truffleruby
+RUN git clone https://github.com/graalvm/mx.git /truffleruby-dev/mx
+RUN wget -O /tmp/labsjdk-ce-21.0.1+12-jvmci-23.1-b22-linux-amd64.tar.gz https://github.com/graalvm/labs-openjdk-21/releases/download/jvmci-23.1-b22/labsjdk-ce-21.0.1+12-jvmci-23.1-b22-linux-amd64.tar.gz
+RUN mkdir -p /root/.mx/jdks/ \
+    && tar xzvf /tmp/labsjdk-ce-21.0.1+12-jvmci-23.1-b22-linux-amd64.tar.gz --directory /root/.mx/jdks/
+ENV MX_PYTHON_VERSION=3
+WORKDIR /truffleruby-dev/truffleruby
+ENV JAVA_HOME=/root/.mx/jdks/labsjdk-ce-21.0.1-jvmci-23.1-b22
+RUN /truffleruby-dev/mx/mx sforceimports
+RUN /truffleruby-dev/mx/mx --dynamicimports /compiler build
+
+## Install TornadoVM 
+WORKDIR /tornado-dev/
+RUN git clone https://github.com/beehive-lab/TornadoVM.git tornado && cd tornado && git checkout master
+WORKDIR /tornado-dev/tornado
+ENV CMAKE_ROOT=/usr
+RUN ./bin/tornadovm-installer --jdk graalvm-jdk-21 --backend opencl --polyglot 
+SHELL ["/bin/bash", "-c", "source /tornado/tornado/setvars.sh"]
+
+## ENV-Variables Taken from the SOURCE.sh
+ENV JAVA_HOME=/tornado-dev/tornado/etc/dependencies/TornadoVM-graalvm-jdk-21/graalvm-community-openjdk-21.0.1+12.1
+ENV PATH=/tornado-dev/tornado/bin/bin:$PATH
+ENV TORNADO_SDK=/tornado-dev/tornado/bin/sdk
+ENV TORNADO_ROOT=/tornado-dev/tornado 
+ENV TRUFFLERUBY_HOME=/truffleruby-dev/graal/sdk/mxbuild/linux-amd64/GRAALVM_AEA5C30A3B_JAVA21/graalvm-aea5c30a3b-java21-23.1.0-dev
+
+## Final Setup
+WORKDIR /data
+VOLUME ["/data"]
+EXPOSE 3000 
