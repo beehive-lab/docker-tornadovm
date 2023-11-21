@@ -1,4 +1,4 @@
-# docker-tornadovm-polyglot
+# docker-tornadovm and Polyglot GraalVM implementations
 Docker build scripts for running Polyglot GraalVM implementations (e.g., GraalPython, GraalJS) with TornadoVM on GPUs.
 The docker images use [TornadoVM (GraalVM 23.1.0)](https://github.com/beehive-lab/TornadoVM/commit/fe269d9b16d9b0b1ac981c80dfec2a5cf7c14206) along with GraalPython ([tag: graal-23.1.0](https://github.com/oracle/graalpython/releases/tag/graal-23.1.0)) and GraalJS ([tag: graal-23.1.0](https://github.com/oracle/graaljs/releases/tag/graal-23.1.0)). The images contain the installation of [OpenCL driver for Nvidia GPUs]().
 
@@ -9,6 +9,7 @@ To build the container you can use a script as follows:
 Please run:
   ./buildDocker.sh --python           to create a volume and build the docker image for tornadovm-graalpy, or
   ./buildDocker.sh --js               to create a volume and build the docker image for tornadovm-graaljs, or
+  ./buildDocker.sh --ruby             to create a volume and build the docker image for tornadovm-truffleruby, or
   ./buildDocker.sh --all              to create a volume and build all docker images, or
   ./buildDocker.sh --deleteVolume     to delete the generated volume, or
   ./buildDocker.sh --help             to print help message
