@@ -13,6 +13,10 @@ We have two docker configurations for TornadoVM using 2 different JDKs:
 	    * TornadoVM with OpenJDK 17
 		* TornadoVM with GraalVM 22.3.1 and JDK 17
 
+* TornadoVM Docker for **Polyglot GraalVM Language Implementations**: See [instructions](https://github.com/beehive-lab/docker-tornadovm#polyglot)
+    * JDKs supported:
+	    * TornadoVM with GraalVM 23.1.0 JDK 21
+
 ## Nvidia GPUs
 
 ### Prerequisites
@@ -21,7 +25,7 @@ The `tornadovm-nvidia-openjdk` docker image needs the docker `nvidia` daemon.  M
 
 ### How to run?
 
-1) Pull the image
+#### 1) Pull the image
 
 For the `tornadovm-nvidia-openjdk` image:
 ```bash
@@ -30,7 +34,7 @@ $ docker pull beehivelab/tornadovm-nvidia-openjdk:latest
 
 This image uses the latest TornadoVM for NVIDIA GPUs and OpenJDK 17.
 
-2) Run an experiment
+#### 2) Run an experiment
 
 We provide a runner script that compiles and run your Java programs with TornadoVM. Here's an example:
 
@@ -79,7 +83,7 @@ The `beehivelab/tornadovm-intel-openjdk` docker image Intel OpenCL driver for th
 
 ### How to run?
 
-1) Pull the image
+#### 1) Pull the image
 
 For the `beehivelab/tornadovm-intel-openjdk` image:
 ```bash
@@ -88,7 +92,7 @@ $ docker pull beehivelab/tornadovm-intel-openjdk:latest
 
 This image uses the latest TornadoVM for Intel integrated graphics and OpenJDK 17.
 
-2) Run an experiment
+#### 2) Run an experiment
 
 We provide a runner script that compiles and run your Java programs with TornadoVM. Here's an example:
 
@@ -139,11 +143,77 @@ With JDK 17:
 $ docker pull beehivelab/tornadovm-intel-graalvm:latest
 ```
 
+## Polyglot GraalVM Language Implementations
+
+### Prerequisites
+
+Currently, there are [three docker images](https://github.com/beehive-lab/docker-tornadovm/tree/master/polyglotImages) available that combine TornadoVM with polyglot GraalVM language implementations (GraalPy, GraalJS and TruffleRuby) and include the OpenCL drivers for NVIDIA GPUs.
+The three docker images need the docker `nvidia` daemon.  More info here: [https://github.com/NVIDIA/nvidia-docker](https://github.com/NVIDIA/nvidia-docker).
+
+### How to run?
+
+#### 1) Pull the images. The images use the latest TornadoVM for NVIDIA GPUs and OpenJDK 21.
+
+* For the `tornadovm-polyglot-graalpy-23.1.0-nvidia-opencl-container` image:
+```bash
+$ docker pull beehivelab/tornadovm-polyglot-graalpy-23.1.0-nvidia-opencl-container:latest
+```
+
+* For the `tornadovm-polyglot-graaljs-23.1.0-nvidia-opencl-container` image:
+```bash
+$ docker pull beehivelab/tornadovm-polyglot-graaljs-23.1.0-nvidia-opencl-container:latest
+```
+
+* For the `tornadovm-polyglot-truffleruby-23.1.0-nvidia-opencl-container` image:
+```bash
+$ docker pull beehivelab/tornadovm-polyglot-truffleruby-23.1.0-nvidia-opencl-container:latest
+```
+
+#### 2) Run an experiment
+
+We provide a runner script for each image in order to compile and run your Python, JavaScript and Ruby programs with TornadoVM. Here's an example taken from [TornadoVM documentation](https://tornadovm.readthedocs.io/en/latest/truffle-languages.html#c-run-the-examples) that executes a matrix multiplication OpenCL kernel from Python, JavaScript and Ruby:
+
+* Python:
+```bash
+$ git clone https://github.com/beehive-lab/docker-tornadovm
+$ cd docker-tornadovm
+
+## Launch the docker image
+$ ./polyglotImages/polyglot-graalpy/tornadovm-polyglot.sh
+
+## Run Matrix Multiplication from a Python program.
+$ ./polyglotImages/polyglot-graalpy/tornadovm-polyglot.sh tornado --printKernel --truffle python /tornado-dev/tornado/bin/sdk/examples/polyglotTruffle/mxmWithTornadoVM.py
+```
+
+* JavaScript:
+```bash
+$ git clone https://github.com/beehive-lab/docker-tornadovm
+$ cd docker-tornadovm
+
+## Launch the docker image
+$ ./polyglotImages/polyglot-graaljs/tornadovm-polyglot.sh
+
+## Run Matrix Multiplication from a JavaScript program.
+$ ./polyglotImages/polyglot-graaljs/tornadovm-polyglot.sh tornado --printKernel --truffle js /tornado-dev/tornado/bin/sdk/examples/polyglotTruffle/mxmWithTornadoVM.js
+```
+
+* Ruby:
+```bash
+$ git clone https://github.com/beehive-lab/docker-tornadovm
+$ cd docker-tornadovm
+
+## Launch the docker image
+$ ./polyglotImages/polyglot-truffleruby/tornadovm-polyglot.sh
+
+## Run Matrix Multiplication from a Python program.
+$ ./polyglotImages/polyglot-truffleruby/tornadovm-polyglot.sh tornado --printKernel --truffle ruby /tornado-dev/tornado/bin/sdk/examples/polyglotTruffle/mxmWithTornadoVM.rb
+```
+
+
 
 Enjoy TornadoVM! 
 
 Docker scripts have been inspired by [blang/latex-docker](https://github.com/blang/latex-docker)
-
 
 ## License
 
