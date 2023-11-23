@@ -13,7 +13,7 @@ We have two docker configurations for TornadoVM using 2 different JDKs:
 	    * TornadoVM with OpenJDK 17
 		* TornadoVM with GraalVM 22.3.1 and JDK 17
 
-* TornadoVM Docker for **Polyglot GraalVM Language Implementations**: See [instructions](https://github.com/beehive-lab/docker-tornadovm#polyglot)
+* TornadoVM Docker for **Polyglot GraalVM Language Implementations**: See [instructions](https://github.com/beehive-lab/docker-tornadovm#polyglot-graalvm-language-implementations)
     * JDKs supported:
 	    * TornadoVM with GraalVM 23.1.0 JDK 21
 
