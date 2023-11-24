@@ -182,7 +182,7 @@ $ cd docker-tornadovm
 $ ./polyglotImages/polyglot-graalpy/tornadovm-polyglot.sh
 
 ## Run Matrix Multiplication from a Python program.
-$ ./polyglotImages/polyglot-graalpy/tornadovm-polyglot.sh tornado --printKernel --truffle python /tornado-dev/tornado/bin/sdk/examples/polyglotTruffle/mxmWithTornadoVM.py
+$ ./polyglotImages/polyglot-graalpy/tornadovm-polyglot.sh tornado --printKernel --truffle python example/polyglot-examples/mxmWithTornadoVM.py
 ```
 
 * JavaScript:
@@ -194,7 +194,7 @@ $ cd docker-tornadovm
 $ ./polyglotImages/polyglot-graaljs/tornadovm-polyglot.sh
 
 ## Run Matrix Multiplication from a JavaScript program.
-$ ./polyglotImages/polyglot-graaljs/tornadovm-polyglot.sh tornado --printKernel --truffle js /tornado-dev/tornado/bin/sdk/examples/polyglotTruffle/mxmWithTornadoVM.js
+$ ./polyglotImages/polyglot-graaljs/tornadovm-polyglot.sh tornado --printKernel --truffle js example/polyglot-examples/mxmWithTornadoVM.js
 ```
 
 * Ruby:
@@ -206,7 +206,7 @@ $ cd docker-tornadovm
 $ ./polyglotImages/polyglot-truffleruby/tornadovm-polyglot.sh
 
 ## Run Matrix Multiplication from a Python program.
-$ ./polyglotImages/polyglot-truffleruby/tornadovm-polyglot.sh tornado --printKernel --truffle ruby /tornado-dev/tornado/bin/sdk/examples/polyglotTruffle/mxmWithTornadoVM.rb
+$ ./polyglotImages/polyglot-truffleruby/tornadovm-polyglot.sh tornado --printKernel --truffle ruby example/polyglot-examples/mxmWithTornadoVM.rb
 ```
 
 
