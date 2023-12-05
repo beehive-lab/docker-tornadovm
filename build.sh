@@ -1,6 +1,6 @@
 #!/bin/bash 
 
-TAG_VERSION=0.15.2-dev
+TAG_VERSION=1.0
 
 function buildDockerImage() {
     IMAGE=$1
@@ -10,36 +10,36 @@ function buildDockerImage() {
     docker tag $IMAGE beehivelab/$IMAGE:latest
 }
 
-function nvidiaJDK17() {
-    buildDockerImage "tornadovm-nvidia-openjdk" "dockerFiles/Dockerfile.nvidia.jdk17"
+function nvidiaJDK21() {
+    buildDockerImage "tornadovm-nvidia-openjdk" "dockerFiles/Dockerfile.nvidia.jdk21"
 }
 
-function nvidiaGraalVMJDK17() {
-    buildDockerImage "tornadovm-nvidia-graalvm" "dockerFiles/Dockerfile.nvidia.graalvm.jdk17"
+function nvidiaGraalVMJDK21() {
+    buildDockerImage "tornadovm-nvidia-graalvm" "dockerFiles/Dockerfile.nvidia.graalvm.jdk21"
 }
 
 
 function nvidiaARM() {
-    buildDockerImage "tornadovm-nvidia-graalvm-arm" "dockerFiles/Dockerfile.nvidia.graalvm.ptx.jdk17"
+    buildDockerImage "tornadovm-nvidia-graalvm-arm" "dockerFiles/Dockerfile.nvidia.graalvm.ptx.jdk21"
 }
 
-function intelJDK17() {
-    buildDockerImage "tornadovm-intel-openjdk" "dockerFiles/Dockerfile.oneapi.intel.jdk17"
+function intelJDK21() {
+    buildDockerImage "tornadovm-intel-openjdk" "dockerFiles/Dockerfile.oneapi.intel.jdk21"
 }
 
-function intelGraalVMJDK17() {
-    buildDockerImage "tornadovm-intel-graalvm" "dockerFiles/Dockerfile.oneapi.intel.graalvm.jdk17"
+function intelGraalVMJDK21() {
+    buildDockerImage "tornadovm-intel-graalvm" "dockerFiles/Dockerfile.oneapi.intel.graalvm.jdk21"
 }
 
 function printHelp() {
     echo "TornadoVM Docker Build"
     echo -e "\nOptions: "
     echo "Builds for NVIDIA Compute Platforms: GPUs"
-    echo "       --nvidia-jdk17         (OpenCL): Build Docker Image for NVIDIA GPUs using JDK11"
-    echo "       --nvidia-graalVM-JDK17 (OpenCL): Build Docker Image for NVIDIA GPUs using GraalVM JDK11"
+    echo "       --nvidia-jdk21         (OpenCL): Build Docker Image for NVIDIA GPUs using JDK21"
+    echo "       --nvidia-graalVM-JDK21 (OpenCL): Build Docker Image for NVIDIA GPUs using GraalVM JDK21"
     echo -e "\nBuilds for Intel Compute Platforms: Integrated GPUs, Intel CPUs and FPGAs (Emulation Mode)"
-    echo "       --intel-jdk17          (OpenCL, SPIR-V): Build Docker Image for Intel Integrated GPUs, Intel CPUs, and Intel FPGAs using JDK17"
-    echo "       --intel-graalVM-JDK17  (OpenCL, SPIR-V): Build Docker Image for Intel Integrated GPUs, Intel CPUs, and Intel FPGAs using GraalVM JDK17"
+    echo "       --intel-jdk21          (OpenCL, SPIR-V): Build Docker Image for Intel Integrated GPUs, Intel CPUs, and Intel FPGAs using JDK21"
+    echo "       --intel-graalVM-JDK21  (OpenCL, SPIR-V): Build Docker Image for Intel Integrated GPUs, Intel CPUs, and Intel FPGAs using GraalVM JDK21"
     echo "Builds for NVIDIA-ARM Compute Platforms: GPUs"
     echo "       --nvidia-arm-graalVM-JDK17 (PTX): Build Docker Image for NVIDIA GPUs using GraalVM JDK11"
     exit 0
@@ -60,23 +60,23 @@ while [[ $# -gt 0 ]]; do
     printHelp
     shift
     ;;
-  --nvidia-jdk17)
-    nvidiaJDK17
+  --nvidia-jdk21)
+    nvidiaJDK21
     shift
     ;;
-  --nvidia-graalVM-JDK17)
-    nvidiaGraalVMJDK17
+  --nvidia-graalVM-JDK21)
+    nvidiaGraalVMJDK21
     shift
     ;;
-  --intel-jdk17)
-    intelJDK17
+  --intel-jdk21)
+    intelJDK21
     shift
     ;;
-  --intel-graalVM-JDK17)
-    intelGraalVMJDK17
+  --intel-graalVM-JDK21)
+    intelGraalVMJDK21
     shift
     ;;
- --nvidia-arm-graalVM-JDK17)
+ --nvidia-arm-graalVM-JDK21)
     nvidiaARM
     shift
     ;;

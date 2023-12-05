@@ -1,4 +1,7 @@
-FROM intel/oneapi-basekit
+## Docker File for TornadoVM on NVIDIA GPUs using GraalVM 23.1.0 JDK21
+## OpenCL Backend only
+
+FROM nvidia/opencl
 
 LABEL MAINTAINER Juan Fumero <juan.fumero@manchester.ac.uk>
 
@@ -10,12 +13,7 @@ RUN python3 -m pip install wget
 
 RUN ln -s /usr/bin/python3 /usr/bin/python
 
-## OpenCL configuration
-RUN apt-get update && apt-get install -y opencl-headers
-RUN ln -s /usr/lib/x86_64-linux-gnu/libOpenCL.so.1 /usr/lib/x86_64-linux-gnu/libOpenCL.so
-ENV OpenCL_LIBRARY /usr/lib/x86_64-linux-gnu/libOpenCL.so.1
-
-COPY settings/settings_intel.xml /root/.m2/settings.xml
+COPY settings/settings.xml /root/.m2/settings.xml
 
 RUN java -version
 RUN javac -version
@@ -23,27 +21,31 @@ RUN javac -version
 ENV PATH /usr/lib/jvm/java-17-openjdk-amd64/bin:$PATH
 ENV JAVA_HOME /usr/lib/jvm/java-17-openjdk-amd64
 
-## Setup TornadoVM
+RUN java -version
+RUN javac -version
+
+## Install TornadoVM 
 WORKDIR /tornado/
 COPY settings/settings.xml /root/.m2/settings.xml
 WORKDIR /tornado/
 RUN git clone https://github.com/beehive-lab/TornadoVM.git tornado
 WORKDIR /tornado/tornado
 ENV CMAKE_ROOT=/usr
-RUN ./scripts/tornadovm-installer --jdk graalvm-jdk-17 --backend opencl,spirv
+RUN ./bin/tornadovm-installer --jdk graalvm-jdk-21 --backend opencl 
 SHELL ["/bin/bash", "-c", "source /tornado/tornado/setvars.sh"]
 
 ## ENV-Variables Taken from the SOURCE.sh
-ENV JAVA_HOME=/tornado/tornado/etc/dependencies/TornadoVM-graalvm-jdk-17/graalvm-ce-java17-22.3.2
+ENV JAVA_HOME=/tornado/tornado/etc/dependencies/TornadoVM-graalvm-jdk-21/graalvm-community-openjdk-21.0.1+12.1
 ENV PATH=/tornado/tornado/bin/bin:$PATH
 ENV TORNADO_SDK=/tornado/tornado/bin/sdk
 ENV TORNADO_ROOT=/tornado/tornado 
-ENV DOCKER_FPGA_EMULATION=1 
 
 ## Download NodeJS NPM packages
 RUN $JAVA_HOME/bin/gu install nodejs
 RUN $JAVA_HOME/bin/npm install express
 RUN $JAVA_HOME/bin/npm install jimp
 
+## Final Setup
 WORKDIR /data
 VOLUME ["/data"]
+EXPOSE 3000 

@@ -10,25 +10,25 @@ else
 fi
 
 if [[ $platform == "intel" ]]; then
-    ./build.sh --intel-jdk17
+    ./build.sh --intel-jdk21
     ./run_intel_openjdk.sh tornado -version
     ./run_intel_openjdk.sh tornado --version
     ./run_intel_openjdk.sh tornado --threadInfo -cp example/target/example-1.0-SNAPSHOT.jar example.MatrixMultiplication
 
 
-    ./build.sh --intel-graalVM-JDK17
+    ./build.sh --intel-graalVM-JDK21
     ./run_intel_graalvm.sh tornado --version
     ./run_intel_graalvm.sh tornado -version
     ./run_intel_graalvm.sh tornado --threadInfo -cp example/target/example-1.0-SNAPSHOT.jar example.MatrixMultiplication
 
 elif [[ $platform == "nvidia" ]]; then
-    ./build.sh --nvidia-jdk17
+    ./build.sh --nvidia-jdk21
     ./run_nvidia_openjdk.sh tornado -version
     ./run_nvidia_openjdk.sh tornado --version
     ./run_nvidia_openjdk.sh tornado --threadInfo -cp example/target/example-1.0-SNAPSHOT.jar example.MatrixMultiplication
 
 
-    ./build.sh --nvidia-graalVM-JDK17
+    ./build.sh --nvidia-graalVM-JDK21
     ./run_nvidia_graalvm.sh tornado --version
     ./run_nvidia_graalvm.sh tornado -version
     ./run_nvidia_graalvm.sh tornado --threadInfo -cp example/target/example-1.0-SNAPSHOT.jar example.MatrixMultiplication

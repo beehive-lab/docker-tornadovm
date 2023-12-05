@@ -1,6 +1,5 @@
-## Docker File for TornadoVM on NVIDIA GPUs using GraalVM 22.3.2 JDK17
-## OpenCL Backend only
-
+## Docker File for TornadoVM on NVIDIA GPUs
+## Adapted for TornadoVM v1.0
 FROM nvidia/opencl
 
 LABEL MAINTAINER Juan Fumero <juan.fumero@manchester.ac.uk>
@@ -21,31 +20,21 @@ RUN javac -version
 ENV PATH /usr/lib/jvm/java-17-openjdk-amd64/bin:$PATH
 ENV JAVA_HOME /usr/lib/jvm/java-17-openjdk-amd64
 
-RUN java -version
-RUN javac -version
-
-## Install TornadoVM 
 WORKDIR /tornado/
 COPY settings/settings.xml /root/.m2/settings.xml
 WORKDIR /tornado/
 RUN git clone https://github.com/beehive-lab/TornadoVM.git tornado
 WORKDIR /tornado/tornado
 ENV CMAKE_ROOT=/usr
-RUN ./scripts/tornadovm-installer --jdk graalvm-jdk-17 --backend opencl 
+RUN ./bin/tornadovm-installer --jdk jdk21 --backend opencl 
 SHELL ["/bin/bash", "-c", "source /tornado/tornado/setvars.sh"]
 
 ## ENV-Variables Taken from the SOURCE.sh
-ENV JAVA_HOME=/tornado/tornado/etc/dependencies/TornadoVM-graalvm-jdk-17/graalvm-ce-java17-22.3.2
+ENV JAVA_HOME=/tornado/tornado/etc/dependencies/TornadoVM-jdk21/jdk-21.0.1
 ENV PATH=/tornado/tornado/bin/bin:$PATH
 ENV TORNADO_SDK=/tornado/tornado/bin/sdk
 ENV TORNADO_ROOT=/tornado/tornado 
 
-## Download NodeJS NPM packages
-RUN $JAVA_HOME/bin/gu install nodejs
-RUN $JAVA_HOME/bin/npm install express
-RUN $JAVA_HOME/bin/npm install jimp
-
-## Final Setup
 WORKDIR /data
 VOLUME ["/data"]
 EXPOSE 3000 
