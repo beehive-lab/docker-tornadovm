@@ -1,6 +1,6 @@
 #!/bin/bash 
 
-TAG_VERSION=1.0
+TAG_VERSION=1.0.1
 
 function buildDockerImage() {
     IMAGE=$1
@@ -35,11 +35,11 @@ function printHelp() {
     echo "TornadoVM Docker Build"
     echo -e "\nOptions: "
     echo "Builds for NVIDIA Compute Platforms: GPUs"
-    echo "       --nvidia-jdk21         (OpenCL): Build Docker Image for NVIDIA GPUs using JDK21"
-    echo "       --nvidia-graalVM-JDK21 (OpenCL): Build Docker Image for NVIDIA GPUs using GraalVM JDK21"
+    echo "       --nvidia-jdk21         (OpenCL) : Build Docker Image for NVIDIA GPUs using JDK21"
+    echo "       --nvidia-graalVM-JDK21 (OpenCL) : Build Docker Image for NVIDIA GPUs using GraalVM JDK21"
     echo -e "\nBuilds for Intel Compute Platforms: Integrated GPUs, Intel CPUs and FPGAs (Emulation Mode)"
-    echo "       --intel-jdk21          (OpenCL, SPIR-V): Build Docker Image for Intel Integrated GPUs, Intel CPUs, and Intel FPGAs using JDK21"
-    echo "       --intel-graalVM-JDK21  (OpenCL, SPIR-V): Build Docker Image for Intel Integrated GPUs, Intel CPUs, and Intel FPGAs using GraalVM JDK21"
+    echo "       --intel-jdk21          (OpenCL) : Build Docker Image for Intel Integrated GPUs, Intel CPUs, and Intel FPGAs using JDK21"
+    echo "       --intel-graalVM-JDK21  (OpenCL) : Build Docker Image for Intel Integrated GPUs, Intel CPUs, and Intel FPGAs using GraalVM JDK21"
     echo "Builds for NVIDIA-ARM Compute Platforms: GPUs"
     echo "       --nvidia-arm-graalVM-JDK17 (PTX): Build Docker Image for NVIDIA GPUs using GraalVM JDK11"
     exit 0
