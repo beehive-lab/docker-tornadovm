@@ -6,12 +6,12 @@ We have two docker configurations for TornadoVM using 2 different JDKs:
 
 * TornadoVM Docker for **NVIDIA GPUs**: See [instructions](https://github.com/beehive-lab/docker-tornadovm#nvidia-gpus)
     * JDKs supported:
-	    * TornadoVM with OpenJDK 17
-		* TornadoVM with GraalVM 22.3.1 and JDK 17
+	    * TornadoVM with OpenJDK 21
+		* TornadoVM with GraalVM 23.1.0 and JDK 21
 * TornadoVM Docker for **Intel Integrated Graphics, Intel CPUs, and Intel FPGAs (Emulated Mode)**: See [instructions](https://github.com/beehive-lab/docker-tornadovm#intel-integrated-graphics)
     * JDKs supported:
-	    * TornadoVM with OpenJDK 17
-		* TornadoVM with GraalVM 22.3.1 and JDK 17
+	    * TornadoVM with OpenJDK 21
+		* TornadoVM with GraalVM 23.1.0 and JDK 21
 
 * TornadoVM Docker for **Polyglot GraalVM Language Implementations**: See [instructions](https://github.com/beehive-lab/docker-tornadovm#polyglot-graalvm-language-implementations)
     * JDKs supported:
@@ -21,7 +21,7 @@ We have two docker configurations for TornadoVM using 2 different JDKs:
 
 ### Prerequisites
 
-The `tornadovm-nvidia-openjdk` docker image needs the docker `nvidia` daemon.  More info here: [https://github.com/NVIDIA/nvidia-docker](https://github.com/NVIDIA/nvidia-docker).
+The `tornadovm-nvidia-openjdk` docker image needs the docker `nvidia` daemon.  More info here: [https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html).
 
 ### How to run?
 
@@ -32,7 +32,7 @@ For the `tornadovm-nvidia-openjdk` image:
 $ docker pull beehivelab/tornadovm-nvidia-openjdk:latest
 ```
 
-This image uses the latest TornadoVM for NVIDIA GPUs and OpenJDK 17.
+This image uses the latest TornadoVM for NVIDIA GPUs and OpenJDK 21.
 
 #### 2) Run an experiment
 
@@ -43,7 +43,7 @@ $ git clone https://github.com/beehive-lab/docker-tornadovm
 $ cd docker-tornadovm
 
 ## Run Matrix Multiplication - provided in the docker-tornadovm repository
-$ ./run_nvidia_openjdk.sh tornado -cp example/target/example-1.0-SNAPSHOT.jar example.MatrixMultiplication
+$ ./run_nvidia_openjdk.sh tornado -cp example/target/example-1.0-SNAPSHOT.jar example.MatrixMultiplication 2048
 
 Computing MxM of 2048x2048
 	CPU Execution: 0.36 GFlops, Total time = 48254 ms
@@ -53,7 +53,7 @@ Computing MxM of 2048x2048
 
 ### Using TornadoVM with GraalVM for NVIDIA GPUs
 
-With JDK 17:
+With JDK 21:
 
 ```bash
 $ docker pull beehivelab/tornadovm-nvidia-graalvm:latest
@@ -90,7 +90,7 @@ For the `beehivelab/tornadovm-intel-openjdk` image:
 $ docker pull beehivelab/tornadovm-intel-openjdk:latest
 ```
 
-This image uses the latest TornadoVM for Intel integrated graphics and OpenJDK 17.
+This image uses the latest TornadoVM for Intel integrated graphics and OpenJDK 21.
 
 #### 2) Run an experiment
 
@@ -137,7 +137,7 @@ Validation: SUCCESS
 
 ### Using TornadoVM with GraalVM for Intel Integrated Graphics
 
-With JDK 17:
+With JDK 21:
 
 ```bash
 $ docker pull beehivelab/tornadovm-intel-graalvm:latest
