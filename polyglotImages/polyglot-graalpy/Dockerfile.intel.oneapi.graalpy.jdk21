@@ -1,0 +1,55 @@
+FROM intel/oneapi-basekit
+
+LABEL MAINTAINER Thanos Stratikopoulos <athanasios.stratikopoulos@manchester.ac.uk>
+
+RUN apt-get update -q && apt-get install -qy \
+        python3 build-essential vim git cmake maven openjdk-17-jdk python3-pip \
+        wget && rm -rf /var/lib/apt/lists/*
+
+RUN python3 -m pip install wget
+
+RUN ln -s /usr/bin/python3 /usr/bin/python
+
+## OpenCL configuration
+RUN apt-get update && apt-get install -y opencl-headers
+RUN ln -s /usr/lib/x86_64-linux-gnu/libOpenCL.so.1 /usr/lib/x86_64-linux-gnu/libOpenCL.so
+ENV OpenCL_LIBRARY /usr/lib/x86_64-linux-gnu/libOpenCL.so.1
+
+RUN java -version
+RUN javac -version
+
+ENV PATH /usr/lib/jvm/java-17-openjdk-amd64/bin:$PATH
+ENV JAVA_HOME /usr/lib/jvm/java-17-openjdk-amd64
+
+# Install GraalPy
+WORKDIR /graalpy-dev/
+RUN git clone https://github.com/oracle/graal /graalpy-dev/graal && cd /graalpy-dev/graal && git checkout 5a21d6dd0051ff99f561d89dfc530d723edb3ab8
+RUN git clone https://github.com/oracle/graalpython.git /graalpy-dev/graalpython && cd /graalpy-dev/graalpython && git checkout graal-23.1.0
+WORKDIR /graalpy-dev/graalpython
+RUN git clone https://github.com/graalvm/mx.git /graalpy-dev/graalpython/mx
+RUN wget -O /tmp/labsjdk-ce-21.0.1+12-jvmci-23.1-b22-linux-amd64.tar.gz https://github.com/graalvm/labs-openjdk-21/releases/download/jvmci-23.1-b22/labsjdk-ce-21.0.1+12-jvmci-23.1-b22-linux-amd64.tar.gz
+RUN mkdir -p /root/.mx/jdks/ \
+    && tar xzvf /tmp/labsjdk-ce-21.0.1+12-jvmci-23.1-b22-linux-amd64.tar.gz --directory /root/.mx/jdks/
+ENV MX_PYTHON_VERSION=3
+WORKDIR /graalpy-dev/graalpython/
+ENV JAVA_HOME=/root/.mx/jdks/labsjdk-ce-21.0.1-jvmci-23.1-b22
+RUN mx/mx --dy /compiler python-gvm
+
+## Install TornadoVM 
+WORKDIR /tornado-dev/
+RUN git clone https://github.com/beehive-lab/TornadoVM.git tornado && cd tornado && git checkout master
+WORKDIR /tornado-dev/tornado
+ENV CMAKE_ROOT=/usr
+RUN ./bin/tornadovm-installer --jdk graalvm-jdk-21 --backend opencl --polyglot 
+SHELL ["/bin/bash", "-c", "source /tornado/tornado/setvars.sh"]
+
+## ENV-Variables Taken from the SOURCE.sh
+ENV JAVA_HOME=/tornado-dev/tornado/etc/dependencies/TornadoVM-graalvm-jdk-21/graalvm-community-openjdk-21.0.1+12.1
+ENV PATH=/tornado-dev/tornado/bin/bin:$PATH
+ENV TORNADO_SDK=/tornado-dev/tornado/bin/sdk
+ENV TORNADO_ROOT=/tornado-dev/tornado 
+ENV GRAALPY_HOME=/graalpy-dev/graal/sdk/mxbuild/linux-amd64/GRAALVM_03DCD25EA1_JAVA21/graalvm-03dcd25ea1-java21-23.1.0-dev
+ENV DOCKER_FPGA_EMULATION=1 
+
+WORKDIR /data
+VOLUME ["/data"]
