@@ -3,7 +3,7 @@ FROM intel/oneapi-basekit
 LABEL MAINTAINER Thanos Stratikopoulos <athanasios.stratikopoulos@manchester.ac.uk>
 
 RUN apt-get update -q && apt-get install -qy \
-        python3 build-essential vim git cmake maven openjdk-17-jdk python3-pip \
+        python3 build-essential vim git cmake maven file openjdk-17-jdk python3-pip \
         wget && rm -rf /var/lib/apt/lists/*
 
 RUN python3 -m pip install wget
