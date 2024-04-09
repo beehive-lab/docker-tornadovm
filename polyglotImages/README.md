@@ -23,7 +23,7 @@ To build all images, try:
 ## Run examples
 To run an example of a Python program from [here](https://github.com/beehive-lab/TornadoVM/blob/master/tornado-assembly/src/examples/polyglotTruffle/mxmWithTornadoVM.py) in the container with TornadoVM use:
 ```bash
-./polyglot-graalpy/tornadovm-polyglot.sh tornado --printKernel --truffle python /tornado-dev/tornado/bin/sdk/examples/polyglotTruffle/mxmWithTornadoVM.py
+./polyglot-graalpy/tornadovm-polyglot-nvidia.sh tornado --printKernel --truffle python /tornado-dev/tornado/bin/sdk/examples/polyglotTruffle/mxmWithTornadoVM.py
 ```
 The output will be:
 ```bash
