@@ -178,11 +178,17 @@ We provide a runner script for each image in order to compile and run your Pytho
 $ git clone https://github.com/beehive-lab/docker-tornadovm
 $ cd docker-tornadovm
 
-## Launch the docker image
-$ ./polyglotImages/polyglot-graalpy/tornadovm-polyglot.sh
+## Launch the docker image with the NVIDIA OpenCL runtime
+$ ./polyglotImages/polyglot-graalpy/tornadovm-polyglot-nvidia.sh
 
 ## Run Matrix Multiplication from a Python program.
-$ ./polyglotImages/polyglot-graalpy/tornadovm-polyglot.sh tornado --printKernel --truffle python example/polyglot-examples/mxmWithTornadoVM.py
+$ ./polyglotImages/polyglot-graalpy/tornadovm-polyglot-nvidia.sh tornado --printKernel --truffle python example/polyglot-examples/mxmWithTornadoVM.py
+
+## Launch the docker image with the Intel oneAPI runtime
+$ ./polyglotImages/polyglot-graalpy/tornadovm-polyglot-intel.sh
+
+## Run Matrix Multiplication from a Python program.
+$ ./polyglotImages/polyglot-graalpy/tornadovm-polyglot-intel.sh tornado --printKernel --truffle python example/polyglot-examples/mxmWithTornadoVM.py
 ```
 
 * JavaScript:
@@ -190,7 +196,7 @@ $ ./polyglotImages/polyglot-graalpy/tornadovm-polyglot.sh tornado --printKernel 
 $ git clone https://github.com/beehive-lab/docker-tornadovm
 $ cd docker-tornadovm
 
-## Launch the docker image
+## Launch the docker image with the NVIDIA OpenCL runtime
 $ ./polyglotImages/polyglot-graaljs/tornadovm-polyglot.sh
 
 ## Run Matrix Multiplication from a JavaScript program.
@@ -202,7 +208,7 @@ $ ./polyglotImages/polyglot-graaljs/tornadovm-polyglot.sh tornado --printKernel 
 $ git clone https://github.com/beehive-lab/docker-tornadovm
 $ cd docker-tornadovm
 
-## Launch the docker image
+## Launch the docker image with the NVIDIA OpenCL runtime
 $ ./polyglotImages/polyglot-truffleruby/tornadovm-polyglot.sh
 
 ## Run Matrix Multiplication from a Python program.
