@@ -19,6 +19,7 @@ package example;
 import java.util.Random;
 import java.util.stream.IntStream;
 
+import uk.ac.manchester.tornado.api.*;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -88,7 +89,12 @@ public class MatrixMultiplication {
 
         ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
         TornadoExecutionPlan executor = new TornadoExecutionPlan(immutableTaskGraph);
-        executor.withWarmUp();
+
+        WorkerGrid workerGrid = new WorkerGrid2D(matrixA.getNumRows(), matrixA.getNumColumns());
+        GridScheduler gridScheduler = new GridScheduler("s0.t0", workerGrid);
+        workerGrid.setLocalWork(16, 16, 1);
+
+        executor.withGridScheduler(gridScheduler).withWarmUp();
 
         // 1. Warm up Tornado
         for (int i = 0; i < WARMING_UP_ITERATIONS; i++) {

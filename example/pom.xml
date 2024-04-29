@@ -29,12 +29,12 @@
     <dependency>
       <groupId>tornado</groupId>
       <artifactId>tornado-api</artifactId>
-      <version>1.0.3-dev</version>
+      <version>1.0.4-dev</version>
     </dependency>
     <dependency>
       <groupId>tornado</groupId>
       <artifactId>tornado-matrices</artifactId>
-      <version>1.0.3-dev</version>
+      <version>1.0.4-dev</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
