@@ -1,6 +1,6 @@
 #!/bin/bash 
 
-TAG_VERSION=1.0.3
+TAG_VERSION=1.0.4
 
 function buildDockerImage() {
     IMAGE=$1

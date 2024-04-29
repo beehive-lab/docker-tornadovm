@@ -32,7 +32,7 @@ RUN ./bin/tornadovm-installer --jdk jdk21 --backend=opencl
 SHELL ["/bin/bash", "-c", "source /tornado/tornado/setvars.sh"]
 
 ## ENV-Variables Taken from the SOURCE.sh
-ENV JAVA_HOME=/tornado/tornado/etc/dependencies/TornadoVM-jdk21/jdk-21.0.2
+ENV JAVA_HOME=/tornado/tornado/etc/dependencies/TornadoVM-jdk21/jdk-21.0.3
 ENV PATH=/tornado/tornado/bin/bin:$PATH
 ENV TORNADO_SDK=/tornado/tornado/bin/sdk
 ENV TORNADO_ROOT=/tornado/tornado
