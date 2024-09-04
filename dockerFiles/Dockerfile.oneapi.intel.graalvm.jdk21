@@ -31,7 +31,7 @@ RUN git clone https://github.com/beehive-lab/TornadoVM.git tornado
 WORKDIR /tornado/tornado
 RUN git checkout tags/v1.0.7
 ENV CMAKE_ROOT /usr
-RUN ./bin/tornadovm-installer --jdk graalvm-jdk-21 --backend opencl
+RUN ./bin/tornadovm-installer --jdk graal-jdk-21 --backend opencl
 SHELL ["/bin/bash", "-c", "source /tornado/tornado/setvars.sh"]
 
 ## ENV-Variables Taken from the SOURCE.sh
