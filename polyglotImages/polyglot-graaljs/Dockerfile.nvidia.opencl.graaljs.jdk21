@@ -12,6 +12,7 @@ RUN apt-get update -q && apt-get install -qy \
         wget clinfo ocl-icd-opencl-dev opencl-headers && rm -rf /var/lib/apt/lists/*
 
 RUN python3 -m pip install wget
+RUN python3 -m pip install psutil
 
 ENV PATH /usr/lib/jvm/java-17-openjdk-amd64/bin:$PATH
 ENV JAVA_HOME /usr/lib/jvm/java-17-openjdk-amd64
@@ -41,7 +42,7 @@ WORKDIR /tornado-dev/
 RUN git clone https://github.com/beehive-lab/TornadoVM.git tornado && cd tornado && git checkout master
 WORKDIR /tornado-dev/tornado
 ENV CMAKE_ROOT=/usr
-RUN ./bin/tornadovm-installer --jdk graal-jdk-21 --backend opencl --polyglot 
+RUN ./bin/tornadovm-installer --jdk graal-jdk-21 --backend opencl
 SHELL ["/bin/bash", "-c", "source /tornado-dev/tornado/setvars.sh"]
 
 ## ENV-Variables Taken from the SOURCE.sh
