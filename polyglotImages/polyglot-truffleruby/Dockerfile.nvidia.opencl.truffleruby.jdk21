@@ -42,7 +42,7 @@ RUN /truffleruby-dev/mx/mx --dynamicimports /compiler build
 
 ## Install TornadoVM 
 WORKDIR /tornado-dev/
-RUN git clone https://github.com/beehive-lab/TornadoVM.git tornado && cd tornado && git checkout master
+RUN git clone https://github.com/beehive-lab/TornadoVM.git tornado && cd tornado && git checkout v1.0.8
 WORKDIR /tornado-dev/tornado
 ENV CMAKE_ROOT=/usr
 RUN ./bin/tornadovm-installer --jdk graal-jdk-21 --backend opencl 
