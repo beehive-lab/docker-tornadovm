@@ -42,14 +42,14 @@ RUN /truffleruby-dev/mx/mx --dynamicimports /compiler build
 
 ## Install TornadoVM 
 WORKDIR /tornado-dev/
-RUN git clone https://github.com/beehive-lab/TornadoVM.git tornado && cd tornado && git checkout master
+RUN git clone https://github.com/beehive-lab/TornadoVM.git tornado && cd tornado && git checkout v1.0.8
 WORKDIR /tornado-dev/tornado
 ENV CMAKE_ROOT=/usr
-RUN ./bin/tornadovm-installer --jdk graalvm-jdk-21 --backend opencl --polyglot 
-SHELL ["/bin/bash", "-c", "source /tornado/tornado/setvars.sh"]
+RUN ./bin/tornadovm-installer --jdk graal-jdk-21 --backend opencl 
+SHELL ["/bin/bash", "-c", "source /tornado-dev/tornado/setvars.sh"]
 
 ## ENV-Variables Taken from the SOURCE.sh
-ENV JAVA_HOME=/tornado-dev/tornado/etc/dependencies/TornadoVM-graalvm-jdk-21/graalvm-community-openjdk-21.0.1+12.1
+ENV JAVA_HOME=/tornado-dev/tornado/etc/dependencies/TornadoVM-graal-jdk-21/graalvm-community-openjdk-21.0.1+12.1
 ENV PATH=/tornado-dev/tornado/bin/bin:$PATH
 ENV TORNADO_SDK=/tornado-dev/tornado/bin/sdk
 ENV TORNADO_ROOT=/tornado-dev/tornado 
