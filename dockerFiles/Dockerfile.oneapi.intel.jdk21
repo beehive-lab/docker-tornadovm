@@ -2,9 +2,9 @@ FROM intel/oneapi-basekit
 
 LABEL MAINTAINER Juan Fumero <juan.fumero@manchester.ac.uk>
 
-RUN apt-get update && apt-get install -y python3 build-essential vim git cmake maven openjdk-17-jdk wget python3-pip
-
-RUN python3 -m pip install wget
+RUN apt-get update && apt-get install -y python3 build-essential vim git cmake \
+    maven openjdk-17-jdk wget python3-requests python3-tqdm python3-urllib3 \
+    python3-wget python3-psutil python3-pip
 
 RUN ln -s /usr/bin/python3 /usr/bin/python
 
@@ -22,18 +22,18 @@ ENV PATH /usr/lib/jvm/java-17-openjdk-amd64/bin:$PATH
 ENV JAVA_HOME /usr/lib/jvm/java-17-openjdk-amd64
 
 ## Setup TornadoVM 
-WORKDIR /tornado/
+WORKDIR /tornado/ 
 COPY settings/settings.xml /root/.m2/settings.xml
 WORKDIR /tornado/
 RUN git clone https://github.com/beehive-lab/TornadoVM.git tornado
 WORKDIR /tornado/tornado
-RUN git checkout tags/v1.0.8
+RUN git checkout tags/v1.0.9
 ENV CMAKE_ROOT /usr
 RUN ./bin/tornadovm-installer --jdk jdk21 --backend=opencl
 SHELL ["/bin/bash", "-c", "source /tornado/tornado/setvars.sh"]
 
 ## ENV-Variables Taken from the SOURCE.sh
-ENV JAVA_HOME /tornado/tornado/etc/dependencies/TornadoVM-jdk21/jdk-21.0.4
+ENV JAVA_HOME /tornado/tornado/etc/dependencies/TornadoVM-jdk21/jdk-21.0.5
 ENV PATH /tornado/tornado/bin/bin:$PATH
 ENV TORNADO_SDK /tornado/tornado/bin/sdk
 ENV TORNADO_ROOT /tornado/tornado

@@ -4,10 +4,9 @@ LABEL MAINTAINER Juan Fumero <juan.fumero@manchester.ac.uk>
 
 RUN apt-get update -q && apt-get install -qy \
         python3 build-essential vim git cmake maven openjdk-17-jdk python3-pip \
-        wget && rm -rf /var/lib/apt/lists/*
-
-RUN python3 -m pip install wget
-
+        python3-requests python3-tqdm python3-urllib3 python3-wget python3-psutil \
+        wget
+        
 RUN ln -s /usr/bin/python3 /usr/bin/python
 
 ## OpenCL configuration
@@ -29,7 +28,7 @@ COPY settings/settings.xml /root/.m2/settings.xml
 WORKDIR /tornado/
 RUN git clone https://github.com/beehive-lab/TornadoVM.git tornado
 WORKDIR /tornado/tornado
-RUN git checkout tags/v1.0.8
+#RUN git checkout tags/v1.0.8
 ENV CMAKE_ROOT /usr
 RUN ./bin/tornadovm-installer --jdk graal-jdk-21 --backend opencl
 SHELL ["/bin/bash", "-c", "source /tornado/tornado/setvars.sh"]
