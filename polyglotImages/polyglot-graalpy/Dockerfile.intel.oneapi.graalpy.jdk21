@@ -3,10 +3,9 @@ FROM intel/oneapi-basekit
 LABEL MAINTAINER Thanos Stratikopoulos <athanasios.stratikopoulos@manchester.ac.uk>
 
 RUN apt-get update -q && apt-get install -qy \
-        python3 build-essential vim git cmake maven file openjdk-17-jdk python3-pip \
+        python3 build-essential vim git cmake maven openjdk-17-jdk python3-pip \
+        python3-requests python3-tqdm python3-urllib3 python3-wget python3-psutil \
         wget && rm -rf /var/lib/apt/lists/*
-
-RUN python3 -m pip install wget
 
 RUN ln -s /usr/bin/python3 /usr/bin/python
 
@@ -40,7 +39,7 @@ WORKDIR /tornado-dev/
 RUN git clone https://github.com/beehive-lab/TornadoVM.git tornado && cd tornado && git checkout master
 WORKDIR /tornado-dev/tornado
 ENV CMAKE_ROOT=/usr
-RUN ./bin/tornadovm-installer --jdk graal-jdk-21 --backend opencl 
+RUN ./bin/tornadovm-installer --jdk graal-jdk-21 --backend opencl --mvn_single_threaded 
 SHELL ["/bin/bash", "-c", "source /tornado-dev/tornado/setvars.sh"]
 
 ## ENV-Variables Taken from the SOURCE.sh
