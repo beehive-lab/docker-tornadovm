@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
-TAG_VERSION=1.0.8
+TAG_VERSION=1.0.11-dev
 
 function buildDockerImage() {
     IMAGE=$1
     FILE=$2
-    docker build -t $IMAGE -f $FILE .
+    DOCKER_BUILDKIT=1 docker build --progress=plain --no-cache -t $IMAGE -f $FILE .
     docker tag $IMAGE beehivelab/$IMAGE:$TAG_VERSION
     docker tag $IMAGE beehivelab/$IMAGE:latest
 }
