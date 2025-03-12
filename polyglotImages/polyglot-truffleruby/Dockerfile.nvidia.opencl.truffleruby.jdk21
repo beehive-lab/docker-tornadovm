@@ -8,7 +8,8 @@ LABEL MAINTAINER Thanos Stratikopoulos <athanasios.stratikopoulos@manchester.ac.
 SHELL ["/bin/bash", "-c"]
 
 RUN apt-get update -q && apt-get install -qy \
-        build-essential vim git cmake maven openjdk-17-jdk python3 python3-pip \
+	python3 build-essential vim git cmake maven openjdk-17-jdk python3-pip \
+	python3-requests python3-tqdm python3-urllib3 python3-wget python3-psutil \
         libyaml-dev make gcc libssl-dev ninja-build \
         wget clinfo ocl-icd-opencl-dev opencl-headers && rm -rf /var/lib/apt/lists/*
 
@@ -42,10 +43,10 @@ RUN /truffleruby-dev/mx/mx --dynamicimports /compiler build
 
 ## Install TornadoVM 
 WORKDIR /tornado-dev/
-RUN git clone https://github.com/beehive-lab/TornadoVM.git tornado && cd tornado && git checkout v1.0.8
+RUN git clone https://github.com/beehive-lab/TornadoVM.git tornado && cd tornado && git checkout master
 WORKDIR /tornado-dev/tornado
 ENV CMAKE_ROOT=/usr
-RUN ./bin/tornadovm-installer --jdk graal-jdk-21 --backend opencl 
+RUN ./bin/tornadovm-installer --jdk graal-jdk-21 --backend opencl --mvn_single_threaded 
 SHELL ["/bin/bash", "-c", "source /tornado-dev/tornado/setvars.sh"]
 
 ## ENV-Variables Taken from the SOURCE.sh
