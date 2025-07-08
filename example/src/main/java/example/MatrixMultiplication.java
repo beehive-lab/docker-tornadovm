@@ -94,7 +94,7 @@ public class MatrixMultiplication {
         GridScheduler gridScheduler = new GridScheduler("s0.t0", workerGrid);
         workerGrid.setLocalWork(16, 16, 1);
 
-        executor.withGridScheduler(gridScheduler).withWarmUp();
+        executor.withGridScheduler(gridScheduler).withPreCompilation();
 
         // 1. Warm up Tornado
         for (int i = 0; i < WARMING_UP_ITERATIONS; i++) {
