@@ -5,10 +5,11 @@ FROM nvidia/opencl
 LABEL MAINTAINER Juan Fumero <juan.fumero@manchester.ac.uk>
 
 RUN apt-get update -q && apt-get install -qy \
-        python3 build-essential vim git cmake maven openjdk-17-jdk python3-pip \
+        python3 build-essential vim git openjdk-17-jdk python3-pip \
         wget && rm -rf /var/lib/apt/lists/*
 
 RUN python3 -m pip install wget
+RUN python3 -m pip install packaging
 
 RUN ln -s /usr/bin/python3 /usr/bin/python
 
@@ -25,13 +26,13 @@ COPY settings/settings.xml /root/.m2/settings.xml
 WORKDIR /tornado/
 RUN git clone https://github.com/beehive-lab/TornadoVM.git tornado
 WORKDIR /tornado/tornado
-RUN git checkout tags/v1.1.0
+RUN git fetch --all --tags && git checkout tags/v1.1.1
 ENV CMAKE_ROOT /usr
-RUN ./bin/tornadovm-installer --jdk jdk21 --backend opencl 
+RUN ./bin/tornadovm-installer --jdk jdk21 --backend opencl --auto-deps 
 SHELL ["/bin/bash", "-c", "source /tornado/tornado/setvars.sh"]
 
 ## ENV-Variables Taken from the SOURCE.sh
-ENV JAVA_HOME /tornado/tornado/etc/dependencies/TornadoVM-jdk21/jdk-21.0.6
+ENV JAVA_HOME /tornado/tornado/etc/dependencies/TornadoVM-jdk21/jdk-21.0.7
 ENV PATH /tornado/tornado/bin/bin:$PATH
 ENV TORNADO_SDK /tornado/tornado/bin/sdk
 ENV TORNADO_ROOT /tornado/tornado 
