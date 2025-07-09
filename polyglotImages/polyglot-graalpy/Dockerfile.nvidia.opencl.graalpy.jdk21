@@ -1,7 +1,6 @@
 ## Docker File for TornadoVM on NVIDIA GPUs using GraalVM 23.1.0 JDK21
 ## OpenCL Backend only
 
-#FROM nvidia/opencl
 FROM ubuntu:22.04
 
 LABEL MAINTAINER Thanos Stratikopoulos <athanasios.stratikopoulos@manchester.ac.uk>
@@ -9,14 +8,19 @@ LABEL MAINTAINER Thanos Stratikopoulos <athanasios.stratikopoulos@manchester.ac.
 SHELL ["/bin/bash", "-c"]
 
 RUN apt-get update -q && apt-get install -qy \
-	python3 build-essential vim git cmake maven openjdk-17-jdk python3-pip \
-	python3-requests python3-tqdm python3-urllib3 python3-wget python3-psutil \
-        wget clinfo ocl-icd-opencl-dev opencl-headers && rm -rf /var/lib/apt/lists/*
+        python3 build-essential vim git cmake maven wget openjdk-17-jdk python3-pip \
+        python3-requests python3-tqdm python3-urllib3 python3-wget python3-psutil \
+        python3-venv clinfo ocl-icd-opencl-dev opencl-headers && rm -rf /var/lib/apt/lists/*
 
-RUN python3 -m pip install wget
+RUN ln -s /usr/bin/python3 /usr/bin/python
+RUN python3 -m venv /opt/venv \
+ && /opt/venv/bin/pip install --upgrade pip \
+ && /opt/venv/bin/pip install wget \
+ && /opt/venv/bin/pip install rich \
+ && /opt/venv/bin/pip install packaging
 
-ENV PATH /usr/lib/jvm/java-17-openjdk-amd64/bin:$PATH
-ENV JAVA_HOME /usr/lib/jvm/java-17-openjdk-amd64
+ENV PATH="/opt/venv/bin:/usr/lib/jvm/java-17-openjdk-amd64/bin:$PATH"
+ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 
 # Enable Nvidia OpenCL
 RUN mkdir -p /etc/OpenCL/vendors && \
@@ -38,12 +42,16 @@ WORKDIR /graalpy-dev/graalpython/
 ENV JAVA_HOME=/root/.mx/jdks/labsjdk-ce-21.0.1-jvmci-23.1-b22
 RUN mx/mx --dy /compiler python-gvm
 
+RUN apt-get remove maven cmake -qy
+
 ## Install TornadoVM 
 WORKDIR /tornado-dev/
-RUN git clone https://github.com/beehive-lab/TornadoVM.git tornado && cd tornado && git checkout master
+RUN git clone https://github.com/beehive-lab/TornadoVM.git tornado && cd tornado
 WORKDIR /tornado-dev/tornado
+RUN git fetch --all --tags && git checkout tags/v1.1.1
 ENV CMAKE_ROOT=/usr
-RUN ./bin/tornadovm-installer --jdk graal-jdk-21 --backend opencl --mvn_single_threaded 
+ENV JAVA_HOME=
+RUN ./bin/tornadovm-installer --jdk graal-jdk-21 --backend opencl --auto-deps --mvn_single_threaded 
 SHELL ["/bin/bash", "-c", "source /tornado-dev/tornado/setvars.sh"]
 
 ## ENV-Variables Taken from the SOURCE.sh
