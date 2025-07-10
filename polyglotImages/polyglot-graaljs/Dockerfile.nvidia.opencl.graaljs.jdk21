@@ -14,6 +14,8 @@ RUN apt-get update -q && apt-get install -qy \
 
 RUN python3 -m pip install wget
 RUN python3 -m pip install psutil
+RUN python3 -m pip install rich
+RUN python3 -m pip install packaging
 
 ENV PATH /usr/lib/jvm/java-17-openjdk-amd64/bin:$PATH
 ENV JAVA_HOME /usr/lib/jvm/java-17-openjdk-amd64
@@ -38,12 +40,16 @@ WORKDIR /graaljs-dev/graaljs/graal-js
 ENV JAVA_HOME=/root/.mx/jdks/labsjdk-ce-21.0.1-jvmci-23.1-b22
 RUN /graaljs-dev/mx/mx --dynamicimports /compiler build
 
+RUN apt-get remove maven cmake -qy
+
 ## Install TornadoVM 
 WORKDIR /tornado-dev/
-RUN git clone https://github.com/beehive-lab/TornadoVM.git tornado && cd tornado && git checkout master
+RUN git clone https://github.com/beehive-lab/TornadoVM.git tornado
 WORKDIR /tornado-dev/tornado
+RUN git fetch --all --tags && git checkout tags/v1.1.1
 ENV CMAKE_ROOT=/usr
-RUN ./bin/tornadovm-installer --jdk graal-jdk-21 --backend opencl --mvn_single_threaded
+ENV JAVA_HOME=
+RUN ./bin/tornadovm-installer --jdk graal-jdk-21 --backend opencl --auto-deps --mvn_single_threaded
 SHELL ["/bin/bash", "-c", "source /tornado-dev/tornado/setvars.sh"]
 
 ## ENV-Variables Taken from the SOURCE.sh
