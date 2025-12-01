@@ -8,8 +8,20 @@ RUN apt-get update -q && apt-get install -qy \
         python3 build-essential vim git openjdk-17-jdk python3-pip \
         wget && rm -rf /var/lib/apt/lists/*
 
+# Set UTF-8 locale env vars
+ENV LANG=C.UTF-8 \
+    LC_ALL=C.UTF-8
+
+# (Optional but good) Install locales package if your base image needs it
+RUN apt-get update && apt-get install -y locales && \
+    locale-gen en_US.UTF-8 || true
+
+# Upgrade pip tooling
+RUN python3 -m pip install --upgrade pip setuptools wheel
+
 RUN python3 -m pip install wget
 RUN python3 -m pip install packaging
+RUN python3 -m pip install streamlit
 
 RUN ln -s /usr/bin/python3 /usr/bin/python
 
@@ -26,13 +38,13 @@ COPY settings/settings.xml /root/.m2/settings.xml
 WORKDIR /tornado/
 RUN git clone https://github.com/beehive-lab/TornadoVM.git tornado
 WORKDIR /tornado/tornado
-RUN git fetch --all --tags && git checkout tags/v1.1.1
+RUN git fetch --all --tags && git checkout tags/v2.0.0
 ENV CMAKE_ROOT /usr
 RUN ./bin/tornadovm-installer --jdk jdk21 --backend opencl --auto-deps 
 SHELL ["/bin/bash", "-c", "source /tornado/tornado/setvars.sh"]
 
 ## ENV-Variables Taken from the SOURCE.sh
-ENV JAVA_HOME /tornado/tornado/etc/dependencies/TornadoVM-jdk21/jdk-21.0.7
+ENV JAVA_HOME /tornado/tornado/etc/dependencies/TornadoVM-jdk21/jdk-21.0.9
 ENV PATH /tornado/tornado/bin/bin:$PATH
 ENV TORNADO_SDK /tornado/tornado/bin/sdk
 ENV TORNADO_ROOT /tornado/tornado 
