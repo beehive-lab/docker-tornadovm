@@ -12,6 +12,7 @@ RUN python3 -m venv /opt/venv \
  && /opt/venv/bin/pip install --upgrade pip \
  && /opt/venv/bin/pip install wget \
  && /opt/venv/bin/pip install rich \
+ && /opt/venv/bin/pip install streamlit \
  && /opt/venv/bin/pip install packaging
 
 ENV PATH="/opt/venv/bin:$PATH"
@@ -45,7 +46,7 @@ RUN mx/mx --dy /compiler python-gvm
 WORKDIR /tornado-dev/
 RUN git clone https://github.com/beehive-lab/TornadoVM.git tornado && cd tornado
 WORKDIR /tornado-dev/tornado
-RUN git fetch --all --tags && git checkout tags/v1.1.1
+RUN git fetch --all --tags && git checkout tags/v2.0.0
 ENV CMAKE_ROOT=/usr
 ENV JAVA_HOME=
 RUN ./bin/tornadovm-installer --jdk graal-jdk-21 --backend opencl --auto-deps --mvn_single_threaded 

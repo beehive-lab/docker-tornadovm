@@ -15,6 +15,7 @@ RUN apt-get update -q && apt-get install -qy \
 
 RUN python3 -m pip install wget
 RUN python3 -m pip install rich
+RUN python3 -m pip install streamlit
 RUN python3 -m pip install packaging
 # TruffleRuby dependency
 RUN python3 -m pip install ninja_syntax
@@ -49,7 +50,7 @@ RUN apt-get remove maven cmake -qy
 WORKDIR /tornado-dev/
 RUN git clone https://github.com/beehive-lab/TornadoVM.git tornado
 WORKDIR /tornado-dev/tornado
-RUN git fetch --all --tags && git checkout tags/v1.1.1
+RUN git fetch --all --tags && git checkout tags/v2.0.0
 ENV JAVA_HOME=
 ENV CMAKE_ROOT=/usr
 RUN ./bin/tornadovm-installer --jdk graal-jdk-21 --backend opencl --auto-deps --mvn_single_threaded 
