@@ -43,7 +43,7 @@ COPY settings/settings.xml /root/.m2/settings.xml
 WORKDIR /tornado/
 RUN git clone https://github.com/beehive-lab/TornadoVM.git tornado
 WORKDIR /tornado/tornado
-RUN git fetch --all --tags && git checkout tags/v2.0.0
+RUN git fetch --all --tags && git checkout tags/v2.1.0
 ENV CMAKE_ROOT /usr
 RUN ./bin/tornadovm-installer --jdk graal-jdk-21 --backend opencl --auto-deps
 SHELL ["/bin/bash", "-c", "source /tornado/tornado/setvars.sh"]
