@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-tag=2.1.0
+tag=4.0.0-jdk21
 docker push beehivelab/tornadovm-nvidia-openjdk:$tag
 docker push beehivelab/tornadovm-nvidia-openjdk:latest
 docker push beehivelab/tornadovm-nvidia-graalvm:$tag

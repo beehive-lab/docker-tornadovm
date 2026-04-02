@@ -50,10 +50,10 @@ replace_in_file() {
 NEW_VERSION="$1"
 
 # Validate semver-ish (digits and dots only)
-if ! [[ "$NEW_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-    die "Version must be in X.Y.Z format (e.g. 2.2.0), got: $NEW_VERSION"
+# Allow X.Y.Z or X.Y.Z-suffix (e.g., -jdk21)
+if ! [[ "$NEW_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9]+)?$ ]]; then
+    die "Version must be X.Y.Z or X.Y.Z-suffix (e.g. 2.2.0 or 2.2.0-jdk21), got: $NEW_VERSION"
 fi
-
 # Auto-detect current version from build.sh
 CURRENT_VERSION=$(grep 'TAG_VERSION=' build.sh | head -1 | cut -d'=' -f2 | tr -d '[:space:]')
 [[ -z "$CURRENT_VERSION" ]] && die "Could not detect current version from build.sh"
