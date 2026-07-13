@@ -1,0 +1,216 @@
+name: Build, Test & Push Docker Images
+
+# Automates what release.sh does manually: bump the version, build the
+# TornadoVM Docker images, smoke-test them on real GPU/iGPU hardware, and
+# (opt-in via push_images) push to the beehivelab Docker Hub org.
+#
+# This repo only supports JDK21 images (OpenJDK and GraalVM CE) — there is no
+# JDK25 Dockerfile at all. --nvidia-arm-graalVM-JDK21 from build.sh is
+# intentionally NOT wired up here: it points at
+# dockerFiles/Dockerfile.nvidia.graalvm.ptx.jdk21, which does not exist (only
+# ...ptx.jdk17 does, and that file has no version-pinned checkout either) —
+# that image is currently broken and needs a real fix, not automation.
+#
+# Requires (not yet provisioned as of writing):
+#   - Self-hosted runner(s) with Docker + an NVIDIA GPU, labeled
+#     [self-hosted, docker-tornadovm, nvidia-gpu]
+#   - Self-hosted runner(s) with Docker + Intel integrated graphics, labeled
+#     [self-hosted, docker-tornadovm, intel-gpu]
+#   - Any self-hosted Linux runner labeled [self-hosted, docker-tornadovm] for
+#     the version-bump commit job (no GPU needed)
+#   - Repo secrets DOCKERHUB_USERNAME / DOCKERHUB_TOKEN with push rights to the
+#     beehivelab org (only read when push_images=true)
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'TornadoVM release tag to build, with -jdk21 suffix (e.g. 4.0.1-jdk21). Only JDK21 is supported by this repo.'
+        required: true
+        type: string
+      platform:
+        description: 'Which images to build/test/push.'
+        required: true
+        type: choice
+        options:
+          - all
+          - nvidia
+          - intel
+        default: all
+      push_images:
+        description: 'Push built images to Docker Hub (beehivelab org) and commit the version bump back to this repo. Leave unchecked for a build+test-only dry run.'
+        required: false
+        type: boolean
+        default: false
+
+concurrency:
+  group: build-test-push-docker
+  cancel-in-progress: false
+
+jobs:
+  nvidia:
+    if: inputs.platform == 'all' || inputs.platform == 'nvidia'
+    name: NVIDIA (build + test + optional push)
+    runs-on: [self-hosted, docker-tornadovm, nvidia-gpu]
+    timeout-minutes: 90
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate version format
+        run: |
+          if [[ ! "${{ inputs.version }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+-jdk21$ ]]; then
+            echo "::error::version must be X.Y.Z-jdk21 (this repo only builds JDK21 images), got '${{ inputs.version }}'."
+            exit 1
+          fi
+
+      - name: Bump version
+        run: ./bump-version.sh "${{ inputs.version }}"
+
+      - name: Log in to Docker Hub
+        if: inputs.push_images == true
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build NVIDIA OpenJDK21 image
+        run: ./build.sh --nvidia-jdk21
+
+      - name: Build NVIDIA GraalVM JDK21 image
+        run: ./build.sh --nvidia-graalVM-JDK21
+
+      - name: Smoke test — NVIDIA OpenJDK21
+        run: |
+          set -euo pipefail
+          ./run_nvidia_openjdk.sh tornado --version 2>&1 | tee /tmp/nvidia-openjdk-version.log
+          ./run_nvidia_openjdk.sh tornado --threadInfo -cp example/target/example-1.0-SNAPSHOT.jar example.MatrixMultiplication 2>&1 | tee /tmp/nvidia-openjdk-matmul.log
+          if grep -qiE 'exception|traceback|fatal error|internal error' /tmp/nvidia-openjdk-version.log /tmp/nvidia-openjdk-matmul.log; then
+            echo "::error::Smoke test output for NVIDIA OpenJDK21 contains an error/exception — failing before push."
+            exit 1
+          fi
+
+      - name: Smoke test — NVIDIA GraalVM JDK21
+        run: |
+          set -euo pipefail
+          ./run_nvidia_graalvm.sh tornado --version 2>&1 | tee /tmp/nvidia-graalvm-version.log
+          ./run_nvidia_graalvm.sh tornado --threadInfo -cp example/target/example-1.0-SNAPSHOT.jar example.MatrixMultiplication 2>&1 | tee /tmp/nvidia-graalvm-matmul.log
+          if grep -qiE 'exception|traceback|fatal error|internal error' /tmp/nvidia-graalvm-version.log /tmp/nvidia-graalvm-matmul.log; then
+            echo "::error::Smoke test output for NVIDIA GraalVM JDK21 contains an error/exception — failing before push."
+            exit 1
+          fi
+
+      - name: Push images
+        if: success() && inputs.push_images == true
+        run: |
+          docker push beehivelab/tornadovm-nvidia-openjdk:"${{ inputs.version }}"
+          docker push beehivelab/tornadovm-nvidia-openjdk:latest
+          docker push beehivelab/tornadovm-nvidia-graalvm:"${{ inputs.version }}"
+          docker push beehivelab/tornadovm-nvidia-graalvm:latest
+
+  intel:
+    if: inputs.platform == 'all' || inputs.platform == 'intel'
+    name: Intel (build + test + optional push)
+    runs-on: [self-hosted, docker-tornadovm, intel-gpu]
+    timeout-minutes: 90
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate version format
+        run: |
+          if [[ ! "${{ inputs.version }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+-jdk21$ ]]; then
+            echo "::error::version must be X.Y.Z-jdk21 (this repo only builds JDK21 images), got '${{ inputs.version }}'."
+            exit 1
+          fi
+
+      - name: Bump version
+        run: ./bump-version.sh "${{ inputs.version }}"
+
+      - name: Log in to Docker Hub
+        if: inputs.push_images == true
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build Intel OpenJDK21 image
+        run: ./build.sh --intel-jdk21
+
+      - name: Build Intel GraalVM JDK21 image
+        run: ./build.sh --intel-graalVM-JDK21
+
+      - name: Smoke test — Intel OpenJDK21
+        run: |
+          set -euo pipefail
+          ./run_intel_openjdk.sh tornado --version 2>&1 | tee /tmp/intel-openjdk-version.log
+          ./run_intel_openjdk.sh tornado --threadInfo -cp example/target/example-1.0-SNAPSHOT.jar example.MatrixMultiplication 2>&1 | tee /tmp/intel-openjdk-matmul.log
+          if grep -qiE 'exception|traceback|fatal error|internal error' /tmp/intel-openjdk-version.log /tmp/intel-openjdk-matmul.log; then
+            echo "::error::Smoke test output for Intel OpenJDK21 contains an error/exception — failing before push."
+            exit 1
+          fi
+
+      - name: Smoke test — Intel GraalVM JDK21
+        run: |
+          set -euo pipefail
+          ./run_intel_graalvm.sh tornado --version 2>&1 | tee /tmp/intel-graalvm-version.log
+          ./run_intel_graalvm.sh tornado --threadInfo -cp example/target/example-1.0-SNAPSHOT.jar example.MatrixMultiplication 2>&1 | tee /tmp/intel-graalvm-matmul.log
+          if grep -qiE 'exception|traceback|fatal error|internal error' /tmp/intel-graalvm-version.log /tmp/intel-graalvm-matmul.log; then
+            echo "::error::Smoke test output for Intel GraalVM JDK21 contains an error/exception — failing before push."
+            exit 1
+          fi
+
+      - name: Push images
+        if: success() && inputs.push_images == true
+        run: |
+          docker push beehivelab/tornadovm-intel-openjdk:"${{ inputs.version }}"
+          docker push beehivelab/tornadovm-intel-openjdk:latest
+          docker push beehivelab/tornadovm-intel-graalvm:"${{ inputs.version }}"
+          docker push beehivelab/tornadovm-intel-graalvm:latest
+
+  commit-version-bump:
+    name: Commit version bump
+    needs: [nvidia, intel]
+    if: |
+      always() &&
+      inputs.push_images == true &&
+      (needs.nvidia.result == 'success' || needs.nvidia.result == 'skipped') &&
+      (needs.intel.result == 'success' || needs.intel.result == 'skipped') &&
+      (needs.nvidia.result == 'success' || needs.intel.result == 'success')
+    runs-on: [self-hosted, docker-tornadovm]
+    permissions:
+      contents: write
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Re-apply version bump
+        run: ./bump-version.sh "${{ inputs.version }}"
+
+      - name: Commit and push
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet; then
+            echo "No changes to commit — repo already at ${{ inputs.version }}."
+            exit 0
+          fi
+          git add -A
+          git commit -m "Bump Docker image version to ${{ inputs.version }}"
+          git push origin HEAD:${{ github.ref_name }}
+
+      - name: Summary
+        run: |
+          {
+            echo "## Docker images ${{ inputs.version }} (${{ inputs.platform }})"
+            echo ""
+            echo "Pushed to Docker Hub (beehivelab org) and version bump committed to \`${{ github.ref_name }}\`."
+          } >> "$GITHUB_STEP_SUMMARY"
