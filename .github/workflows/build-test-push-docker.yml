@@ -25,7 +25,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'TornadoVM release tag to build, with -jdk21 suffix (e.g. 4.0.1-jdk21). Only JDK21 is supported by this repo.'
+        description: 'TornadoVM release tag to build — just paste the tag as it appears on GitHub Releases, e.g. v5.0.0-jdk21 (only JDK21 is supported by this repo).'
         required: true
         type: string
       platform:
@@ -61,13 +61,19 @@ jobs:
 
       - name: Validate version format
         run: |
-          if [[ ! "${{ inputs.version }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+-jdk21$ ]]; then
-            echo "::error::version must be X.Y.Z-jdk21 (this repo only builds JDK21 images), got '${{ inputs.version }}'."
+          if [[ ! "${{ inputs.version }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+-jdk21$ ]]; then
+            echo "::error::version must be the full release tag vX.Y.Z-jdk21 (this repo only builds JDK21 images), got '${{ inputs.version }}'."
             exit 1
           fi
 
+      - name: Derive version
+        id: derive
+        run: echo "version=${INPUT_VERSION#v}" >> "$GITHUB_OUTPUT"
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+
       - name: Bump version
-        run: ./bump-version.sh "${{ inputs.version }}"
+        run: ./bump-version.sh "${{ steps.derive.outputs.version }}"
 
       - name: Log in to Docker Hub
         if: inputs.push_images == true
@@ -105,9 +111,9 @@ jobs:
       - name: Push images
         if: success() && inputs.push_images == true
         run: |
-          docker push beehivelab/tornadovm-nvidia-openjdk:"${{ inputs.version }}"
+          docker push beehivelab/tornadovm-nvidia-openjdk:"${{ steps.derive.outputs.version }}"
           docker push beehivelab/tornadovm-nvidia-openjdk:latest
-          docker push beehivelab/tornadovm-nvidia-graalvm:"${{ inputs.version }}"
+          docker push beehivelab/tornadovm-nvidia-graalvm:"${{ steps.derive.outputs.version }}"
           docker push beehivelab/tornadovm-nvidia-graalvm:latest
 
   intel:
@@ -123,13 +129,19 @@ jobs:
 
       - name: Validate version format
         run: |
-          if [[ ! "${{ inputs.version }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+-jdk21$ ]]; then
-            echo "::error::version must be X.Y.Z-jdk21 (this repo only builds JDK21 images), got '${{ inputs.version }}'."
+          if [[ ! "${{ inputs.version }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+-jdk21$ ]]; then
+            echo "::error::version must be the full release tag vX.Y.Z-jdk21 (this repo only builds JDK21 images), got '${{ inputs.version }}'."
             exit 1
           fi
 
+      - name: Derive version
+        id: derive
+        run: echo "version=${INPUT_VERSION#v}" >> "$GITHUB_OUTPUT"
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+
       - name: Bump version
-        run: ./bump-version.sh "${{ inputs.version }}"
+        run: ./bump-version.sh "${{ steps.derive.outputs.version }}"
 
       - name: Log in to Docker Hub
         if: inputs.push_images == true
@@ -167,9 +179,9 @@ jobs:
       - name: Push images
         if: success() && inputs.push_images == true
         run: |
-          docker push beehivelab/tornadovm-intel-openjdk:"${{ inputs.version }}"
+          docker push beehivelab/tornadovm-intel-openjdk:"${{ steps.derive.outputs.version }}"
           docker push beehivelab/tornadovm-intel-openjdk:latest
-          docker push beehivelab/tornadovm-intel-graalvm:"${{ inputs.version }}"
+          docker push beehivelab/tornadovm-intel-graalvm:"${{ steps.derive.outputs.version }}"
           docker push beehivelab/tornadovm-intel-graalvm:latest
 
   commit-version-bump:
@@ -191,8 +203,14 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Derive version
+        id: derive
+        run: echo "version=${INPUT_VERSION#v}" >> "$GITHUB_OUTPUT"
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+
       - name: Re-apply version bump
-        run: ./bump-version.sh "${{ inputs.version }}"
+        run: ./bump-version.sh "${{ steps.derive.outputs.version }}"
 
       - name: Commit and push
         run: |
