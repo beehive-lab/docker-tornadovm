@@ -46,10 +46,14 @@ WORKDIR /tornado/tornado
 RUN git fetch --all --tags && git checkout tags/v4.0.0-jdk21
 ENV CMAKE_ROOT /usr
 RUN ./bin/tornadovm-installer --jdk graal-jdk-21 --backend opencl --auto-deps
+RUN ln -s "$(find /tornado/tornado/etc/dependencies/TornadoVM-graal-jdk-21 -mindepth 1 -maxdepth 1 -type d)" \
+    /tornado/tornado/etc/dependencies/TornadoVM-graal-jdk-21/current
 SHELL ["/bin/bash", "-c", "source /tornado/tornado/setvars.sh"]
 
-## ENV-Variables Taken from the SOURCE.sh
-ENV JAVA_HOME /tornado/tornado/etc/dependencies/TornadoVM-graal-jdk-21/graalvm-community-openjdk-21.0.1+12.1
+## JAVA_HOME resolved dynamically above via the "current" symlink — the
+## installer always fetches the latest GraalVM JDK21 build, so a hardcoded
+## version here (e.g. 21.0.1+12.1) breaks the moment a newer one ships.
+ENV JAVA_HOME /tornado/tornado/etc/dependencies/TornadoVM-graal-jdk-21/current
 ENV PATH /tornado/tornado/bin/bin:$PATH
 ENV TORNADOVM_HOME /tornado/tornado/bin/sdk
 ENV TORNADO_ROOT /tornado/tornado 
