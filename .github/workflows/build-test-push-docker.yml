@@ -170,7 +170,7 @@ jobs:
     needs: nvidia
     if: inputs.push_images == true && needs.nvidia.result == 'success'
     runs-on: [self-hosted, docker-tornadovm, nvidia-gpu]
-    timeout-minutes: 30
+    timeout-minutes: 120
     steps:
       - name: Derive version
         id: derive
@@ -202,7 +202,7 @@ jobs:
     needs: nvidia
     if: inputs.push_images == true && needs.nvidia.result == 'success'
     runs-on: [self-hosted, docker-tornadovm, nvidia-gpu]
-    timeout-minutes: 30
+    timeout-minutes: 120
     steps:
       - name: Derive version
         id: derive
@@ -234,7 +234,7 @@ jobs:
     needs: intel
     if: inputs.push_images == true && needs.intel.result == 'success'
     runs-on: [self-hosted, docker-tornadovm, intel-gpu]
-    timeout-minutes: 30
+    timeout-minutes: 120
     steps:
       - name: Derive version
         id: derive
@@ -266,7 +266,7 @@ jobs:
     needs: intel
     if: inputs.push_images == true && needs.intel.result == 'success'
     runs-on: [self-hosted, docker-tornadovm, intel-gpu]
-    timeout-minutes: 30
+    timeout-minutes: 120
     steps:
       - name: Derive version
         id: derive
