@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-TAG_VERSION=4.0.0-jdk21
+TAG_VERSION=5.0.0-jdk21
 
 function buildDockerImage() {
     IMAGE=$1
