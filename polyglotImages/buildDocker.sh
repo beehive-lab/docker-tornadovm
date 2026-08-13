@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# ⚠️ DEPRECATED — these polyglot images are frozen at v5.2.0-jdk21, the last TornadoVM
+# release with polyglot GraalVM Truffle-language support. TAG_VERSION below is
+# intentionally NOT touched by ../bump-version.sh anymore. See ./README.md.
 TAG_VERSION=5.2.0-jdk21
 
 function buildDockerImage() {

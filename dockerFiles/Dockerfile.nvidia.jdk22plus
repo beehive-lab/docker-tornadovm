@@ -1,0 +1,74 @@
+## Docker File for TornadoVM on NVIDIA GPUs, JVMCI-free JDK 27+ profile ("jdk22plus")
+## OpenCL backend only.
+##
+## EXPERIMENTAL — best-effort profile, run as its own opt-in job in the GitHub workflow
+## (build_jdk22plus input), not gated to the same correctness bar as the stable JDK21
+## images, and not bumped by bump-version.sh (its TornadoVM ref comes in via the
+## TORNADO_TAG build-arg, supplied by build.sh/the workflow). Builds via the `make jdk27
+## BACKEND=opencl` Makefile target, which needs a JVMCI-free JDK 27+ as JAVA_HOME plus a
+## JDK 21 (JVMCI_SOURCE_JDK) to vendor the platform's removed jdk.internal.vm.ci module
+## from (JDK 27 dropped JVMCI entirely, see openjdk/jdk#30834).
+##
+## TODO before this file goes live: "v6.0.0" (the default below) is a PLACEHOLDER —
+## replace it with the real release tag once JDK 27 (JVMCI-free) support ships in a
+## tagged beehive-lab/TornadoVM release. The JDK 27 build below is pinned to an early-
+## access build for the same reason — move to a GA build once one exists.
+
+FROM nvidia/opencl
+
+LABEL MAINTAINER Thanos Stratikopoulos <athanasios.stratikopoulos@manchester.ac.uk>
+
+## TornadoVM ref to check out — override with --build-arg TORNADO_TAG=... (the build
+## scripts/workflow pass this in explicitly; the default here is only for standalone
+## `docker build` runs of this file).
+ARG TORNADO_TAG=v6.0.0
+
+RUN apt-get update -q && apt-get install -qy \
+        python3 python3-pip build-essential cmake vim git wget \
+        openjdk-21-jdk ocl-icd-opencl-dev opencl-headers && rm -rf /var/lib/apt/lists/*
+
+# Set UTF-8 locale env vars
+ENV LANG=C.UTF-8 \
+    LC_ALL=C.UTF-8
+
+RUN python3 -m pip install --upgrade pip setuptools wheel
+RUN python3 -m pip install wget packaging streamlit requests tqdm urllib3
+RUN ln -s /usr/bin/python3 /usr/bin/python
+
+COPY settings/settings.xml /root/.m2/settings.xml
+
+## JDK 21 — source for the vendored jdk.internal.vm.ci module (the jdk27 Maven profile's
+## jvmci-vendoring step repackages its jvmci classes into a same-named application
+## module, since JDK 27 no longer ships one).
+ENV JVMCI_SOURCE_JDK=/usr/lib/jvm/java-21-openjdk-amd64
+
+## JDK 27 (JVMCI-free) — the actual build/run JDK for this profile.
+RUN wget -q -O /tmp/jdk27.tar.gz \
+        https://download.java.net/java/early_access/jdk27/24/GPL/openjdk-27-ea+24_linux-x64_bin.tar.gz \
+    && mkdir -p /opt/jdk27 \
+    && tar xzf /tmp/jdk27.tar.gz -C /opt/jdk27 --strip-components=1 \
+    && rm /tmp/jdk27.tar.gz
+ENV JAVA_HOME=/opt/jdk27
+ENV PATH=$JAVA_HOME/bin:$PATH
+
+RUN java -version
+RUN javac -version
+
+## Install TornadoVM
+WORKDIR /tornado/
+RUN git clone https://github.com/beehive-lab/TornadoVM.git tornado
+WORKDIR /tornado/tornado
+RUN git fetch --all --tags && git checkout "${TORNADO_TAG}"
+ENV CMAKE_ROOT=/usr
+RUN make jdk27 BACKEND=opencl
+SHELL ["/bin/bash", "-c", "source /tornado/tornado/setvars.sh"]
+
+## TORNADOVM_HOME is always <repo>/bin/sdk for a plain `make`/`bin/compile` build (no
+## --sdk archive step).
+ENV TORNADOVM_HOME /tornado/tornado/bin/sdk
+ENV PATH $TORNADOVM_HOME/bin:$PATH
+ENV TORNADO_ROOT /tornado/tornado
+
+WORKDIR /data
+VOLUME ["/data"]
+EXPOSE 3000

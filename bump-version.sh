@@ -10,10 +10,19 @@
 #   - build.sh                                        (TAG_VERSION=)
 #   - push.sh                                         (tag=)
 #   - push-intel.sh                                   (tag=)
-#   - polyglotImages/buildDocker.sh                   (TAG_VERSION=)
 #   - dockerFiles/Dockerfile.*                        (git checkout tags/v)
-#   - polyglotImages/**/Dockerfile.*                  (git checkout tags/v)
 #   - example/pom.xml                                 (tornado-api / tornado-matrices versions)
+#
+# NOT touched by this script (deliberately):
+#   - polyglotImages/**                               DEPRECATED — frozen at v5.2.0-jdk21, the
+#                                                       last TornadoVM release with polyglot
+#                                                       GraalVM Truffle-language support. See
+#                                                       polyglotImages/README.md.
+#   - dockerFiles/Dockerfile.*.jdk22plus               EXPERIMENTAL — versioned independently
+#                                                       via the TORNADO_TAG build-arg (see
+#                                                       build.sh's TAG_VERSION_JDK22PLUS and the
+#                                                       Dockerfiles' header comments), not a
+#                                                       beehive-lab release tag yet.
 
 set -euo pipefail
 
@@ -71,20 +80,16 @@ echo ""
 replace_in_file "build.sh"                     "TAG_VERSION=${CURRENT_VERSION}" "TAG_VERSION=${NEW_VERSION}"
 replace_in_file "push.sh"                      "tag=${CURRENT_VERSION}"         "tag=${NEW_VERSION}"
 replace_in_file "push-intel.sh"                "tag=${CURRENT_VERSION}"         "tag=${NEW_VERSION}"
-replace_in_file "polyglotImages/buildDocker.sh" "TAG_VERSION=${CURRENT_VERSION}" "TAG_VERSION=${NEW_VERSION}"
 
 # ── Dockerfiles ───────────────────────────────────────────────────────────────
+# polyglotImages/** and dockerFiles/Dockerfile.*.jdk22plus are deliberately excluded —
+# see the header comment.
 
 DOCKERFILES=(
     dockerFiles/Dockerfile.nvidia.jdk21
     dockerFiles/Dockerfile.nvidia.graalvm.jdk21
-    dockerFiles/Dockerfile.nvidia.graalvm.ptx.jdk17
     dockerFiles/Dockerfile.oneapi.intel.jdk21
     dockerFiles/Dockerfile.oneapi.intel.graalvm.jdk21
-    polyglotImages/polyglot-graalpy/Dockerfile.intel.oneapi.graalpy.jdk21
-    polyglotImages/polyglot-graalpy/Dockerfile.nvidia.opencl.graalpy.jdk21
-    polyglotImages/polyglot-graaljs/Dockerfile.nvidia.opencl.graaljs.jdk21
-    polyglotImages/polyglot-truffleruby/Dockerfile.nvidia.opencl.truffleruby.jdk21
 )
 
 for f in "${DOCKERFILES[@]}"; do
@@ -117,3 +122,6 @@ echo "Next steps:"
 echo "  Build all images  :  ./buildAll.sh intel   OR   ./buildAll.sh nvidia"
 echo "  Push all images   :  ./push.sh"
 echo "  Push Intel only   :  ./push-intel.sh"
+echo ""
+echo "Not bumped (see header comment): polyglotImages/** (deprecated, frozen) and"
+echo "dockerFiles/Dockerfile.*.jdk22plus (experimental, commit-pinned)."
