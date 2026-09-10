@@ -1,6 +1,6 @@
 #!/bin/bash
 
-TAG_VERSION=5.2.0-jdk21
+TAG_VERSION=6.0.0-jdk21
 
 ## EXPERIMENTAL — unified "jdk22plus" profile (runs unchanged on JDK 22-27+). Versioned
 ## independently from TAG_VERSION above (best-effort, not gated to the stable images'

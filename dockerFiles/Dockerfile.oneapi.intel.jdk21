@@ -35,7 +35,7 @@ COPY settings/settings.xml /root/.m2/settings.xml
 WORKDIR /tornado/
 RUN git clone https://github.com/beehive-lab/TornadoVM.git tornado
 WORKDIR /tornado/tornado
-RUN git fetch --all --tags && git checkout tags/v5.2.0-jdk21
+RUN git fetch --all --tags && git checkout tags/v6.0.0-jdk21
 ENV CMAKE_ROOT /usr
 RUN ./bin/tornadovm-installer --jdk jdk21 --backend=opencl --auto-deps
 RUN ln -s "$(find /tornado/tornado/etc/dependencies/TornadoVM-jdk21 -mindepth 1 -maxdepth 1 -type d)" \
