@@ -4,16 +4,24 @@
 ## EXPERIMENTAL — best-effort profile, run as its own opt-in job in the GitHub workflow
 ## (build_jdk22plus input), not gated to the same correctness bar as the stable JDK21
 ## images, and not bumped by bump-version.sh (its TornadoVM ref comes in via the
-## TORNADO_TAG build-arg, supplied by build.sh/the workflow). Builds via the `make
-## jdk22plus BACKEND=opencl` Makefile target (jdk25/jdk26/jdk27 are kept as aliases of
-## the same target — TornadoVM collapsed its per-version JDK25+ profiles into one
-## jdk22plus SDK that runs unchanged on JDK 22 through 27 and later; the build JDK below
-## is pinned to 25 purely to match convention elsewhere in this project, not a
-## requirement — any JDK >= 22 produces an identical artifact). Still needs a JDK 21
-## (JVMCI_SOURCE_JDK) to vendor jdk.internal.vm.ci, which JDK 22+ no longer ships (see
-## openjdk/jdk#30834). Unlike the NVIDIA build of this profile, this Intel variant has
-## not been validated upstream — the OpenCL/reflection path is vendor-neutral, but treat
-## this image as unverified.
+## TORNADO_TAG build-arg, supplied by build.sh/the workflow).
+##
+## Uses TornadoVM's own bin/tornadovm-installer --auto-deps to fetch the build JDK and
+## build TornadoVM — the same idiom Dockerfile.oneapi.intel.jdk21 already uses,
+## requesting jdk25 here instead of jdk21 ("jdk22plus" itself isn't an installable JDK
+## keyword — tornadovm-installer's own _infer_jdk_profile maps any requested JDK >= 22
+## onto the jdk22plus Maven profile automatically). jdk22plus runs unchanged on every JDK
+## from 22 up (see the Makefile's jdk22plus comment); 25 is pinned purely to match
+## convention elsewhere in this project, not a requirement.
+##
+## jdk22plus still needs a SEPARATE JDK 21 (JVMCI_SOURCE_JDK) to vendor
+## jdk.internal.vm.ci, which JDK 22+ no longer ships (openjdk/jdk#30834) —
+## tornadovm-installer's --auto-deps only fetches the one JDK you ask it for, so that
+## JDK 21 is fetched directly here as a GA Temurin tarball, same as before.
+##
+## Unlike the NVIDIA build of this profile, this Intel variant has not been validated
+## upstream — the OpenCL/reflection path is vendor-neutral, but treat this image as
+## unverified.
 
 FROM intel/oneapi-basekit
 
@@ -24,7 +32,14 @@ LABEL MAINTAINER Thanos Stratikopoulos <athanasios.stratikopoulos@manchester.ac.
 ## `docker build` runs of this file).
 ARG TORNADO_TAG=v6.1.0
 
-RUN apt-get update && apt-get install -y python3 python3-pip build-essential cmake vim git \
+## python3-venv is required here (missing in an earlier version of this file — the
+## NVIDIA variant's own base OS doesn't ship a usable python3-pip at all, so that gap
+## went unnoticed there; on this Ubuntu 24.04 base `python3 -m venv` otherwise fails
+## with "ensurepip is not available", confirmed on real hardware, see
+## https://github.com/beehive-lab/docker-tornadovm/actions/runs/34491239472). This base
+## OS's stock python3 is already 3.12 — no Python-floor issue here, unlike the NVIDIA
+## variant's Ubuntu 18.04 base.
+RUN apt-get update && apt-get install -y python3 python3-pip python3-venv build-essential cmake vim git \
     wget opencl-headers apt-utils
 
 RUN ln -s /usr/bin/python3 /usr/bin/python
@@ -40,11 +55,10 @@ ENV OpenCL_LIBRARY /usr/lib/x86_64-linux-gnu/libOpenCL.so.1
 
 COPY settings/settings_intel.xml /root/.m2/settings.xml
 
-## JDK 21 — source for the vendored jdk.internal.vm.ci module (the jdk22plus Maven
-## profile's jvmci-vendoring step repackages its jvmci classes into a same-named
-## application module, since JDK 22+ no longer ships one). Pulled as a GA Temurin
-## tarball rather than apt — not guaranteed to be packaged on every base image this
-## Dockerfile might run on (confirmed missing on the NVIDIA variant's Ubuntu 18.04 base).
+## JDK 21 — source for the vendored jdk.internal.vm.ci module (see header comment).
+## Pulled as a GA Temurin tarball rather than apt — not guaranteed to be packaged on
+## every base image this Dockerfile might run on (confirmed missing on the NVIDIA
+## variant's Ubuntu 18.04 base).
 RUN wget -q -O /tmp/jdk21.tar.gz \
         "https://api.adoptium.net/v3/binary/latest/21/ga/linux/x64/jdk/hotspot/normal/eclipse" \
     && mkdir -p /opt/jdk21 \
@@ -52,34 +66,27 @@ RUN wget -q -O /tmp/jdk21.tar.gz \
     && rm /tmp/jdk21.tar.gz
 ENV JVMCI_SOURCE_JDK=/opt/jdk21
 
-## JDK 25 — the build/run JDK for this profile (any GA JDK >= 22 works identically; see
-## the header comment). Pulled the same way, via Adoptium's stable "latest" redirect.
-RUN wget -q -O /tmp/jdk25.tar.gz \
-        "https://api.adoptium.net/v3/binary/latest/25/ga/linux/x64/jdk/hotspot/normal/eclipse" \
-    && mkdir -p /opt/jdk25 \
-    && tar xzf /tmp/jdk25.tar.gz -C /opt/jdk25 --strip-components=1 \
-    && rm /tmp/jdk25.tar.gz
-ENV JAVA_HOME=/opt/jdk25
-ENV PATH=$JAVA_HOME/bin:$PATH
-
-RUN java -version
-RUN javac -version
-
 ## Setup TornadoVM
-WORKDIR /tornado/
-COPY settings/settings.xml /root/.m2/settings.xml
 WORKDIR /tornado/
 RUN git clone https://github.com/beehive-lab/TornadoVM.git tornado
 WORKDIR /tornado/tornado
 RUN git fetch --all --tags && git checkout "${TORNADO_TAG}"
 ENV CMAKE_ROOT=/usr
-RUN make jdk22plus BACKEND=opencl
+
+## bin/tornadovm-installer's own --auto-deps path downloads and installs JDK 25 itself,
+## then builds TornadoVM against it — same idiom Dockerfile.oneapi.intel.jdk21 uses for
+## jdk21.
+RUN ./bin/tornadovm-installer --jdk jdk25 --backend=opencl --auto-deps
+RUN ln -s "$(find /tornado/tornado/etc/dependencies/TornadoVM-jdk25 -mindepth 1 -maxdepth 1 -type d)" \
+    /tornado/tornado/etc/dependencies/TornadoVM-jdk25/current
 SHELL ["/bin/bash", "-c", "source /tornado/tornado/setvars.sh"]
 
-## TORNADOVM_HOME is always <repo>/bin/sdk for a plain `make`/`bin/compile` build (no
-## --sdk archive step).
+## JAVA_HOME resolved dynamically above via the "current" symlink — the installer always
+## fetches the latest JDK25 build, so a hardcoded patch version here would break the
+## moment a newer one ships (matches Dockerfile.oneapi.intel.jdk21's own comment/approach).
+ENV JAVA_HOME /tornado/tornado/etc/dependencies/TornadoVM-jdk25/current
+ENV PATH /tornado/tornado/bin/bin:$PATH
 ENV TORNADOVM_HOME /tornado/tornado/bin/sdk
-ENV PATH $TORNADOVM_HOME/bin:$PATH
 ENV TORNADO_ROOT /tornado/tornado
 ENV DOCKER_FPGA_EMULATION 1
 

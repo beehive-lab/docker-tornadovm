@@ -4,14 +4,28 @@
 ## EXPERIMENTAL — best-effort profile, run as its own opt-in job in the GitHub workflow
 ## (build_jdk22plus input), not gated to the same correctness bar as the stable JDK21
 ## images, and not bumped by bump-version.sh (its TornadoVM ref comes in via the
-## TORNADO_TAG build-arg, supplied by build.sh/the workflow). Builds via the `make
-## jdk22plus BACKEND=opencl` Makefile target (jdk25/jdk26/jdk27 are kept as aliases of
-## the same target — TornadoVM collapsed its per-version JDK25+ profiles into one
-## jdk22plus SDK that runs unchanged on JDK 22 through 27 and later; the build JDK below
-## is pinned to 25 purely to match convention elsewhere in this project (see
-## deploy-maven-central.yml/build-release-sdks.yml in TornadoVM), not a requirement — any
-## JDK >= 22 produces an identical artifact). Still needs a JDK 21 (JVMCI_SOURCE_JDK) to
-## vendor jdk.internal.vm.ci, which JDK 22+ no longer ships (see openjdk/jdk#30834).
+## TORNADO_TAG build-arg, supplied by build.sh/the workflow).
+##
+## Uses TornadoVM's own bin/tornadovm-installer --auto-deps to fetch the build JDK and
+## build TornadoVM — the same idiom Dockerfile.nvidia.jdk21 already uses, requesting
+## jdk25 here instead of jdk21 ("jdk22plus" itself isn't an installable JDK keyword —
+## tornadovm-installer's own _infer_jdk_profile maps any requested JDK >= 22 onto the
+## jdk22plus Maven profile automatically). jdk22plus runs unchanged on every JDK from 22
+## up (see the Makefile's jdk22plus comment); 25 is pinned purely to match convention
+## elsewhere in this project, not a requirement.
+##
+## jdk22plus still needs a SEPARATE JDK 21 (JVMCI_SOURCE_JDK) to vendor
+## jdk.internal.vm.ci, which JDK 22+ no longer ships (openjdk/jdk#30834) —
+## tornadovm-installer's --auto-deps only fetches the one JDK you ask it for, so that
+## JDK 21 is fetched directly here as a GA Temurin tarball, same as before.
+##
+## Also installs python3.7 and makes it the system python3/python: TornadoVM's own build
+## tooling (bin/build_graal_module.py, exercised only by the JVMCI-vendoring step above —
+## jdk21 never hits it) calls subprocess.run(..., text=True), a Python 3.7+-only kwarg.
+## This image's base OS (Ubuntu 18.04 "bionic") ships Python 3.6 by default, which throws
+## `TypeError: __init__() got an unexpected keyword argument 'text'` the moment
+## jdk22plus's build is attempted — confirmed on real hardware (run
+## https://github.com/beehive-lab/docker-tornadovm/actions/runs/34491239472).
 
 FROM nvidia/opencl
 
@@ -23,24 +37,49 @@ LABEL MAINTAINER Thanos Stratikopoulos <athanasios.stratikopoulos@manchester.ac.
 ARG TORNADO_TAG=v6.1.0
 
 RUN apt-get update -q && apt-get install -qy \
-        python3 python3-pip build-essential cmake vim git wget \
+        build-essential cmake vim git wget gnupg ca-certificates \
         ocl-icd-opencl-dev opencl-headers && rm -rf /var/lib/apt/lists/*
 
 # Set UTF-8 locale env vars
 ENV LANG=C.UTF-8 \
     LC_ALL=C.UTF-8
 
+# Bionic's own bionic-security/universe python3.7 package is incomplete for this use —
+# it lacks distutils entirely (no python3.7-distutils candidate exists there) and
+# disables ensurepip like every Debian/Ubuntu-archive "system" Python does ("Install the
+# python-pip package to use pip itself"). The deadsnakes PPA's python3.7 build doesn't
+# have either gap (confirmed: distutils imports fine, `python3.7 -m venv` and
+# `get-pip.py` both work) — see the header comment for why 3.7 is needed here at all.
+#
+# The PPA is added by hand (sources.list entry + key fetched directly over HTTPS)
+# instead of via `add-apt-repository ppa:deadsnakes/ppa`: that tool's own key-fetch
+# handshake (apt-key adv --keyserver, the legacy HKP protocol) intermittently failed
+# here with "Cannot add PPA: ... has no PPA named 'ubuntu/ppa'" — a transient keyserver
+# hiccup, not a real config error (retrying the identical command outside a build
+# succeeded) — but not something to gamble on in CI. The fingerprint below is deadsnakes'
+# actual signing key, confirmed via Launchpad's own API
+# (launchpad.net/api/1.0/~deadsnakes/+archive/ubuntu/ppa -> signing_key_fingerprint).
+RUN echo "deb https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu bionic main" \
+        > /etc/apt/sources.list.d/deadsnakes.list \
+    && wget -qO- "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xF23C5A6CF475977595C89F51BA6932366A755776" \
+        | gpg --dearmor -o /etc/apt/trusted.gpg.d/deadsnakes.gpg \
+    && apt-get update -q \
+    && apt-get install -qy python3.7 python3.7-venv python3.7-distutils \
+    && rm -rf /var/lib/apt/lists/*
+
+# Make python3.7 the interpreter `python3`/`python` resolve to, system-wide.
+RUN ln -sf /usr/bin/python3.7 /usr/bin/python3 && ln -sf /usr/bin/python3.7 /usr/bin/python
+RUN wget -q -O /tmp/get-pip.py "https://bootstrap.pypa.io/pip/3.7/get-pip.py" \
+    && python3 /tmp/get-pip.py \
+    && rm /tmp/get-pip.py
 RUN python3 -m pip install --upgrade pip setuptools wheel
 RUN python3 -m pip install wget packaging streamlit requests tqdm urllib3
-RUN ln -s /usr/bin/python3 /usr/bin/python
 
 COPY settings/settings.xml /root/.m2/settings.xml
 
-## JDK 21 — source for the vendored jdk.internal.vm.ci module (the jdk22plus Maven
-## profile's jvmci-vendoring step repackages its jvmci classes into a same-named
-## application module, since JDK 22+ no longer ships one). Pulled as a GA Temurin
-## tarball rather than apt: this image's base OS (Ubuntu 18.04 "bionic", via
-## nvidia/opencl) predates any apt package for a modern JDK entirely.
+## JDK 21 — source for the vendored jdk.internal.vm.ci module (see header comment).
+## Pulled as a GA Temurin tarball rather than apt: this image's base OS predates any apt
+## package for a modern JDK entirely.
 RUN wget -q -O /tmp/jdk21.tar.gz \
         "https://api.adoptium.net/v3/binary/latest/21/ga/linux/x64/jdk/hotspot/normal/eclipse" \
     && mkdir -p /opt/jdk21 \
@@ -48,32 +87,26 @@ RUN wget -q -O /tmp/jdk21.tar.gz \
     && rm /tmp/jdk21.tar.gz
 ENV JVMCI_SOURCE_JDK=/opt/jdk21
 
-## JDK 25 — the build/run JDK for this profile (any GA JDK >= 22 works identically; see
-## the header comment). Pulled the same way, via Adoptium's stable "latest" redirect.
-RUN wget -q -O /tmp/jdk25.tar.gz \
-        "https://api.adoptium.net/v3/binary/latest/25/ga/linux/x64/jdk/hotspot/normal/eclipse" \
-    && mkdir -p /opt/jdk25 \
-    && tar xzf /tmp/jdk25.tar.gz -C /opt/jdk25 --strip-components=1 \
-    && rm /tmp/jdk25.tar.gz
-ENV JAVA_HOME=/opt/jdk25
-ENV PATH=$JAVA_HOME/bin:$PATH
-
-RUN java -version
-RUN javac -version
-
 ## Install TornadoVM
 WORKDIR /tornado/
 RUN git clone https://github.com/beehive-lab/TornadoVM.git tornado
 WORKDIR /tornado/tornado
 RUN git fetch --all --tags && git checkout "${TORNADO_TAG}"
 ENV CMAKE_ROOT=/usr
-RUN make jdk22plus BACKEND=opencl
+
+## bin/tornadovm-installer's own --auto-deps path downloads and installs JDK 25 itself,
+## then builds TornadoVM against it — same idiom Dockerfile.nvidia.jdk21 uses for jdk21.
+RUN ./bin/tornadovm-installer --jdk jdk25 --backend opencl --auto-deps
+RUN ln -s "$(find /tornado/tornado/etc/dependencies/TornadoVM-jdk25 -mindepth 1 -maxdepth 1 -type d)" \
+    /tornado/tornado/etc/dependencies/TornadoVM-jdk25/current
 SHELL ["/bin/bash", "-c", "source /tornado/tornado/setvars.sh"]
 
-## TORNADOVM_HOME is always <repo>/bin/sdk for a plain `make`/`bin/compile` build (no
-## --sdk archive step).
+## JAVA_HOME resolved dynamically above via the "current" symlink — the installer always
+## fetches the latest JDK25 build, so a hardcoded patch version here would break the
+## moment a newer one ships (matches Dockerfile.nvidia.jdk21's own comment/approach).
+ENV JAVA_HOME /tornado/tornado/etc/dependencies/TornadoVM-jdk25/current
+ENV PATH /tornado/tornado/bin/bin:$PATH
 ENV TORNADOVM_HOME /tornado/tornado/bin/sdk
-ENV PATH $TORNADOVM_HOME/bin:$PATH
 ENV TORNADO_ROOT /tornado/tornado
 
 WORKDIR /data
