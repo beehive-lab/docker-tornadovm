@@ -1,3 +1,6 @@
+## ⚠️ DEPRECATED — frozen at TornadoVM v5.2.0-jdk21, the last release with polyglot
+## GraalVM Truffle-language support. Not updated further; see polyglotImages/README.md.
+##
 ## Docker File for TornadoVM on NVIDIA GPUs using GraalVM 23.1.0 JDK21
 ## OpenCL Backend only
 

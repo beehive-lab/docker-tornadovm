@@ -13,9 +13,13 @@ We have two docker configurations for TornadoVM using 2 different JDKs:
 	    * TornadoVM with OpenJDK 21
 		* TornadoVM with GraalVM 23.1.0 and JDK 21
 
-* TornadoVM Docker for **Polyglot GraalVM Language Implementations**: See [instructions](https://github.com/beehive-lab/docker-tornadovm#polyglot-graalvm-language-implementations)
+* TornadoVM Docker for **Polyglot GraalVM Language Implementations** (⚠️ **deprecated**, frozen at v5.2.0-jdk21): See [instructions](https://github.com/beehive-lab/docker-tornadovm#polyglot-graalvm-language-implementations)
     * JDKs supported:
 	    * TornadoVM with GraalVM 23.1.0 JDK 21
+
+* TornadoVM Docker for **NVIDIA/Intel GPUs, JVMCI-free JDK 27+** (⚠️ **experimental**, best-effort): See [instructions](https://github.com/beehive-lab/docker-tornadovm#jdk-27-jvmci-free-experimental)
+    * JDKs supported:
+	    * TornadoVM with JDK 27 (JVMCI removed from the platform; TornadoVM supplies it itself — see `dockerFiles/Dockerfile.*.jdk22plus`)
 
 ## Nvidia GPUs
 
@@ -145,6 +149,10 @@ $ docker pull beehivelab/tornadovm-intel-graalvm:latest
 
 ## Polyglot GraalVM Language Implementations
 
+> ⚠️ **Deprecated.** Frozen at TornadoVM **v5.2.0-jdk21** — the last release with
+> polyglot GraalVM Truffle-language support. No further updates are planned. See
+> [`polyglotImages/README.md`](polyglotImages/README.md).
+
 ### Prerequisites
 
 Currently, there are [three docker images](https://github.com/beehive-lab/docker-tornadovm/tree/master/polyglotImages) available that combine TornadoVM with polyglot GraalVM language implementations (GraalPy, GraalJS and TruffleRuby) and include the OpenCL drivers for NVIDIA GPUs.
@@ -216,6 +224,19 @@ $ ./polyglotImages/polyglot-truffleruby/tornadovm-polyglot.sh tornado --printKer
 ```
 
 
+## JDK 27+ (JVMCI-free)
+
+Build:
+```bash
+$ ./build.sh --nvidia-jdk22plus   # or --intel-jdk22plus (unvalidated)
+```
+
+Run (same runner pattern as the JDK21 images, using the `tornadovm-*-jdk22plus` image):
+```bash
+$ docker run --runtime=nvidia --rm -i --user="$(id -u):$(id -g)" --net=none -v "$PWD":/data \
+    beehivelab/tornadovm-nvidia-jdk22plus:latest \
+    tornado -cp example/target/example-1.0-SNAPSHOT.jar example.MatrixMultiplication
+```
 
 Enjoy TornadoVM! 
 

@@ -1,13 +1,23 @@
-#!/bin/bash 
+#!/bin/bash
 
 TAG_VERSION=6.0.0-jdk21
 
+## EXPERIMENTAL — unified "jdk22plus" profile (runs unchanged on JDK 22-27+). Versioned
+## independently from TAG_VERSION above (best-effort, not gated to the stable images'
+## correctness bar) — override with `TAG_VERSION_JDK22PLUS=6.1.0 ./build.sh
+## --nvidia-jdk22plus`, e.g. from the GitHub workflow, which derives it from the same
+## `version` input the stable images use, just without the `-jdk21` suffix. Not touched
+## by bump-version.sh.
+TAG_VERSION_JDK22PLUS="${TAG_VERSION_JDK22PLUS:-6.1.0}"
+
 function buildDockerImage() {
-    IMAGE=$1
-    FILE=$2
-    docker build -t $IMAGE --progress=plain -f $FILE .
-    docker tag $IMAGE beehivelab/$IMAGE:$TAG_VERSION
-    docker tag $IMAGE beehivelab/$IMAGE:latest
+    local IMAGE=$1
+    local FILE=$2
+    local VERSION=${3:-$TAG_VERSION}
+    local EXTRA_ARGS=("${@:4}")
+    docker build -t "$IMAGE" --progress=plain -f "$FILE" "${EXTRA_ARGS[@]}" .
+    docker tag "$IMAGE" "beehivelab/$IMAGE:$VERSION"
+    docker tag "$IMAGE" "beehivelab/$IMAGE:latest"
 }
 
 function nvidiaJDK21() {
@@ -18,17 +28,26 @@ function nvidiaGraalVMJDK21() {
     buildDockerImage "tornadovm-nvidia-graalvm" "dockerFiles/Dockerfile.nvidia.graalvm.jdk21"
 }
 
-
-function nvidiaARM() {
-    buildDockerImage "tornadovm-nvidia-graalvm-arm" "dockerFiles/Dockerfile.nvidia.graalvm.ptx.jdk21"
-}
-
 function intelJDK21() {
     buildDockerImage "tornadovm-intel-openjdk" "dockerFiles/Dockerfile.oneapi.intel.jdk21"
 }
 
 function intelGraalVMJDK21() {
     buildDockerImage "tornadovm-intel-graalvm" "dockerFiles/Dockerfile.oneapi.intel.graalvm.jdk21"
+}
+
+## EXPERIMENTAL — unified "jdk22plus" profile, built via the `make jdk22plus` Makefile
+## target (runs unchanged on JDK 22-27+; see the Dockerfiles' header comments).
+## TORNADO_TAG (the TornadoVM ref baked into the image) is the bare
+## "v${TAG_VERSION_JDK22PLUS}".
+function nvidiaJDK22Plus() {
+    buildDockerImage "tornadovm-nvidia-jdk22plus" "dockerFiles/Dockerfile.nvidia.jdk22plus" \
+        "$TAG_VERSION_JDK22PLUS" --build-arg "TORNADO_TAG=v${TAG_VERSION_JDK22PLUS}"
+}
+
+function intelJDK22Plus() {
+    buildDockerImage "tornadovm-intel-jdk22plus" "dockerFiles/Dockerfile.oneapi.intel.jdk22plus" \
+        "$TAG_VERSION_JDK22PLUS" --build-arg "TORNADO_TAG=v${TAG_VERSION_JDK22PLUS}"
 }
 
 function printHelp() {
@@ -40,8 +59,9 @@ function printHelp() {
     echo -e "\nBuilds for Intel Compute Platforms: Integrated GPUs, Intel CPUs and FPGAs (Emulation Mode)"
     echo "       --intel-jdk21          (OpenCL) : Build Docker Image for Intel Integrated GPUs, Intel CPUs, and Intel FPGAs using JDK21"
     echo "       --intel-graalVM-JDK21  (OpenCL) : Build Docker Image for Intel Integrated GPUs, Intel CPUs, and Intel FPGAs using GraalVM JDK21"
-    echo "Builds for NVIDIA-ARM Compute Platforms: GPUs"
-    echo "       --nvidia-arm-graalVM-JDK17 (PTX): Build Docker Image for NVIDIA GPUs using GraalVM JDK11"
+    echo -e "\nEXPERIMENTAL — unified jdk22plus profile, JDK 22-27+ (best-effort; see the Dockerfile header for status/known gaps)"
+    echo "       --nvidia-jdk22plus     (OpenCL) : Build Docker Image for NVIDIA GPUs using the jdk22plus profile"
+    echo "       --intel-jdk22plus      (OpenCL) : Build Docker Image for Intel Integrated GPUs using the jdk22plus profile (unvalidated)"
     exit 0
 }
 
@@ -76,8 +96,12 @@ while [[ $# -gt 0 ]]; do
     intelGraalVMJDK21
     shift
     ;;
- --nvidia-arm-graalVM-JDK21)
-    nvidiaARM
+  --nvidia-jdk22plus)
+    nvidiaJDK22Plus
+    shift
+    ;;
+  --intel-jdk22plus)
+    intelJDK22Plus
     shift
     ;;
   esac

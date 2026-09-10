@@ -1,3 +1,6 @@
+## ⚠️ DEPRECATED — frozen at TornadoVM v5.2.0-jdk21, the last release with polyglot
+## GraalVM Truffle-language support. Not updated further; see polyglotImages/README.md.
+
 FROM intel/oneapi-basekit
 
 LABEL MAINTAINER Thanos Stratikopoulos <athanasios.stratikopoulos@manchester.ac.uk>

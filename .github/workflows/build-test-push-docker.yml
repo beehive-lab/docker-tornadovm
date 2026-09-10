@@ -4,19 +4,27 @@ name: Build, Test & Push Docker Images
 # TornadoVM Docker images, smoke-test them on real GPU/iGPU hardware, and
 # (opt-in via push_images) push each image to the beehivelab Docker Hub org.
 #
-# Each image push is its OWN job (push-nvidia-openjdk, push-nvidia-graalvm,
-# push-intel-openjdk, push-intel-graalvm), gated only on its platform's
-# build+test job. If one push fails (e.g. a Docker Hub network blip), use
-# GitHub's "Re-run failed jobs" on that run — it reruns only the failed push
-# job (and commit-version-bump, which depends on it), NOT the build/test jobs
-# or the other three pushes, which already succeeded.
+# `version` is a BARE release version, vX.Y.Z (no JDK suffix) — the workflow derives a
+# different tag from it per image family:
+#   - stable JDK21 images (OpenJDK + GraalVM CE, nvidia + intel): "${version}-jdk21",
+#     e.g. v6.0.0 -> 6.0.0-jdk21, matching the real beehive-lab/TornadoVM release tag
+#     and going through bump-version.sh same as always.
+#   - EXPERIMENTAL jdk22plus images (opt-in via build_jdk22plus): the bare version as-is,
+#     e.g. v6.0.0 -> 6.0.0, passed through to the Dockerfiles' TORNADO_TAG build-arg.
+#     Not touched by bump-version.sh — see dockerFiles/Dockerfile.*.jdk22plus.
 #
-# This repo only supports JDK21 images (OpenJDK and GraalVM CE) — there is no
-# JDK25 Dockerfile at all. --nvidia-arm-graalVM-JDK21 from build.sh is
-# intentionally NOT wired up here: it points at
-# dockerFiles/Dockerfile.nvidia.graalvm.ptx.jdk21, which does not exist (only
-# ...ptx.jdk17 does, and that file has no version-pinned checkout either) —
-# that image is currently broken and needs a real fix, not automation.
+# Each image push is its OWN job (push-nvidia-openjdk, push-nvidia-graalvm,
+# push-intel-openjdk, push-intel-graalvm, and — when build_jdk22plus is set —
+# push-nvidia-jdk22plus, push-intel-jdk22plus), gated only on its platform's build+test
+# job. If one push fails (e.g. a Docker Hub network blip), use GitHub's "Re-run failed
+# jobs" on that run — it reruns only the failed push job (and commit-version-bump, which
+# depends on the stable pushes), NOT the build/test jobs or the other pushes, which
+# already succeeded.
+#
+# The jdk22plus jobs are best-effort: continue-on-error, and their smoke test only
+# checks that `tornado --version` runs (no MatrixMultiplication run — this profile has
+# known correctness gaps on some kernel shapes, so a strict smoke test would produce
+# false failures on an otherwise-working image). They never gate commit-version-bump.
 #
 # Requires (not yet provisioned as of writing):
 #   - Self-hosted runner(s) with Docker + an NVIDIA GPU, labeled
@@ -36,7 +44,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'TornadoVM release tag to build — just paste the tag as it appears on GitHub Releases, e.g. v5.0.0-jdk21 (only JDK21 is supported by this repo).'
+        description: 'Bare TornadoVM release version, vX.Y.Z — no JDK suffix (e.g. v6.0.0). Suffixed "-jdk21" for the stable images; used as-is for the experimental jdk22plus images.'
         required: true
         type: string
       platform:
@@ -48,6 +56,11 @@ on:
           - nvidia
           - intel
         default: all
+      build_jdk22plus:
+        description: 'Also build (and, if push_images is set, push) the experimental JVMCI-free JDK 27 (jdk22plus) images for the selected platform(s). Best-effort — failures here do not fail the run.'
+        required: false
+        type: boolean
+        default: false
       push_images:
         description: 'Push built images to Docker Hub (beehivelab org) and commit the version bump back to this repo. Leave unchecked for a build+test-only dry run.'
         required: false
@@ -72,14 +85,14 @@ jobs:
 
       - name: Validate version format
         run: |
-          if [[ ! "${{ inputs.version }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+-jdk21$ ]]; then
-            echo "::error::version must be the full release tag vX.Y.Z-jdk21 (this repo only builds JDK21 images), got '${{ inputs.version }}'."
+          if [[ ! "${{ inputs.version }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::version must be a bare release version vX.Y.Z (no JDK suffix), got '${{ inputs.version }}'."
             exit 1
           fi
 
       - name: Derive version
         id: derive
-        run: echo "version=${INPUT_VERSION#v}" >> "$GITHUB_OUTPUT"
+        run: echo "version=${INPUT_VERSION#v}-jdk21" >> "$GITHUB_OUTPUT"
         env:
           INPUT_VERSION: ${{ inputs.version }}
 
@@ -125,14 +138,14 @@ jobs:
 
       - name: Validate version format
         run: |
-          if [[ ! "${{ inputs.version }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+-jdk21$ ]]; then
-            echo "::error::version must be the full release tag vX.Y.Z-jdk21 (this repo only builds JDK21 images), got '${{ inputs.version }}'."
+          if [[ ! "${{ inputs.version }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::version must be a bare release version vX.Y.Z (no JDK suffix), got '${{ inputs.version }}'."
             exit 1
           fi
 
       - name: Derive version
         id: derive
-        run: echo "version=${INPUT_VERSION#v}" >> "$GITHUB_OUTPUT"
+        run: echo "version=${INPUT_VERSION#v}-jdk21" >> "$GITHUB_OUTPUT"
         env:
           INPUT_VERSION: ${{ inputs.version }}
 
@@ -165,6 +178,88 @@ jobs:
             exit 1
           fi
 
+  nvidia-jdk22plus:
+    if: (inputs.platform == 'all' || inputs.platform == 'nvidia') && inputs.build_jdk22plus == true
+    name: NVIDIA jdk22plus (build + test, best-effort)
+    continue-on-error: true
+    runs-on: [self-hosted, docker-tornadovm, nvidia-gpu]
+    timeout-minutes: 90
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate version format
+        run: |
+          if [[ ! "${{ inputs.version }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::version must be a bare release version vX.Y.Z (no JDK suffix), got '${{ inputs.version }}'."
+            exit 1
+          fi
+
+      - name: Derive version
+        id: derive
+        run: echo "version=${INPUT_VERSION#v}" >> "$GITHUB_OUTPUT"
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+
+      - name: Build NVIDIA jdk22plus image
+        run: ./build.sh --nvidia-jdk22plus
+        env:
+          TAG_VERSION_JDK22PLUS: ${{ steps.derive.outputs.version }}
+
+      - name: Smoke test — NVIDIA jdk22plus
+        run: |
+          set -euo pipefail
+          docker run --runtime=nvidia --rm -i --user="$(id -u):$(id -g)" --net=none \
+            -v "$PWD":/data beehivelab/tornadovm-nvidia-jdk22plus:latest \
+            tornado --version 2>&1 | tee /tmp/nvidia-jdk22plus-version.log
+          if grep -qiE 'exception|traceback|fatal error|internal error' /tmp/nvidia-jdk22plus-version.log; then
+            echo "::error::Smoke test output for NVIDIA jdk22plus contains an error/exception — failing before push."
+            exit 1
+          fi
+
+  intel-jdk22plus:
+    if: (inputs.platform == 'all' || inputs.platform == 'intel') && inputs.build_jdk22plus == true
+    name: Intel jdk22plus (build + test, best-effort)
+    continue-on-error: true
+    runs-on: [self-hosted, docker-tornadovm, intel-gpu]
+    timeout-minutes: 90
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate version format
+        run: |
+          if [[ ! "${{ inputs.version }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::version must be a bare release version vX.Y.Z (no JDK suffix), got '${{ inputs.version }}'."
+            exit 1
+          fi
+
+      - name: Derive version
+        id: derive
+        run: echo "version=${INPUT_VERSION#v}" >> "$GITHUB_OUTPUT"
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+
+      - name: Build Intel jdk22plus image
+        run: ./build.sh --intel-jdk22plus
+        env:
+          TAG_VERSION_JDK22PLUS: ${{ steps.derive.outputs.version }}
+
+      - name: Smoke test — Intel jdk22plus
+        run: |
+          set -euo pipefail
+          docker run -i --device /dev/dri:/dev/dri --rm -v "$PWD":/example -w /example \
+            beehivelab/tornadovm-intel-jdk22plus:latest \
+            tornado --version 2>&1 | tee /tmp/intel-jdk22plus-version.log
+          if grep -qiE 'exception|traceback|fatal error|internal error' /tmp/intel-jdk22plus-version.log; then
+            echo "::error::Smoke test output for Intel jdk22plus contains an error/exception — failing before push."
+            exit 1
+          fi
+
   push-nvidia-openjdk:
     name: Push — NVIDIA OpenJDK21
     needs: nvidia
@@ -174,7 +269,7 @@ jobs:
     steps:
       - name: Derive version
         id: derive
-        run: echo "version=${INPUT_VERSION#v}" >> "$GITHUB_OUTPUT"
+        run: echo "version=${INPUT_VERSION#v}-jdk21" >> "$GITHUB_OUTPUT"
         env:
           INPUT_VERSION: ${{ inputs.version }}
 
@@ -206,7 +301,7 @@ jobs:
     steps:
       - name: Derive version
         id: derive
-        run: echo "version=${INPUT_VERSION#v}" >> "$GITHUB_OUTPUT"
+        run: echo "version=${INPUT_VERSION#v}-jdk21" >> "$GITHUB_OUTPUT"
         env:
           INPUT_VERSION: ${{ inputs.version }}
 
@@ -238,7 +333,7 @@ jobs:
     steps:
       - name: Derive version
         id: derive
-        run: echo "version=${INPUT_VERSION#v}" >> "$GITHUB_OUTPUT"
+        run: echo "version=${INPUT_VERSION#v}-jdk21" >> "$GITHUB_OUTPUT"
         env:
           INPUT_VERSION: ${{ inputs.version }}
 
@@ -270,7 +365,7 @@ jobs:
     steps:
       - name: Derive version
         id: derive
-        run: echo "version=${INPUT_VERSION#v}" >> "$GITHUB_OUTPUT"
+        run: echo "version=${INPUT_VERSION#v}-jdk21" >> "$GITHUB_OUTPUT"
         env:
           INPUT_VERSION: ${{ inputs.version }}
 
@@ -292,6 +387,72 @@ jobs:
           set -euo pipefail
           docker push beehivelab/tornadovm-intel-graalvm:"${{ steps.derive.outputs.version }}"
           docker push beehivelab/tornadovm-intel-graalvm:latest
+
+  push-nvidia-jdk22plus:
+    name: Push — NVIDIA jdk22plus (best-effort)
+    needs: nvidia-jdk22plus
+    continue-on-error: true
+    if: inputs.push_images == true && inputs.build_jdk22plus == true && needs['nvidia-jdk22plus'].result == 'success'
+    runs-on: [self-hosted, docker-tornadovm, nvidia-gpu]
+    timeout-minutes: 120
+    steps:
+      - name: Derive version
+        id: derive
+        run: echo "version=${INPUT_VERSION#v}" >> "$GITHUB_OUTPUT"
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+
+      - name: Verify image was built locally
+        run: |
+          if ! docker image inspect "beehivelab/tornadovm-nvidia-jdk22plus:${{ steps.derive.outputs.version }}" >/dev/null 2>&1; then
+            echo "::error::beehivelab/tornadovm-nvidia-jdk22plus:${{ steps.derive.outputs.version }} is not present on this runner."
+            exit 1
+          fi
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Push image
+        run: |
+          set -euo pipefail
+          docker push beehivelab/tornadovm-nvidia-jdk22plus:"${{ steps.derive.outputs.version }}"
+          docker push beehivelab/tornadovm-nvidia-jdk22plus:latest
+
+  push-intel-jdk22plus:
+    name: Push — Intel jdk22plus (best-effort)
+    needs: intel-jdk22plus
+    continue-on-error: true
+    if: inputs.push_images == true && inputs.build_jdk22plus == true && needs['intel-jdk22plus'].result == 'success'
+    runs-on: [self-hosted, docker-tornadovm, intel-gpu]
+    timeout-minutes: 120
+    steps:
+      - name: Derive version
+        id: derive
+        run: echo "version=${INPUT_VERSION#v}" >> "$GITHUB_OUTPUT"
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+
+      - name: Verify image was built locally
+        run: |
+          if ! docker image inspect "beehivelab/tornadovm-intel-jdk22plus:${{ steps.derive.outputs.version }}" >/dev/null 2>&1; then
+            echo "::error::beehivelab/tornadovm-intel-jdk22plus:${{ steps.derive.outputs.version }} is not present on this runner."
+            exit 1
+          fi
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Push image
+        run: |
+          set -euo pipefail
+          docker push beehivelab/tornadovm-intel-jdk22plus:"${{ steps.derive.outputs.version }}"
+          docker push beehivelab/tornadovm-intel-jdk22plus:latest
 
   commit-version-bump:
     name: Commit version bump
@@ -316,7 +477,7 @@ jobs:
 
       - name: Derive version
         id: derive
-        run: echo "version=${INPUT_VERSION#v}" >> "$GITHUB_OUTPUT"
+        run: echo "version=${INPUT_VERSION#v}-jdk21" >> "$GITHUB_OUTPUT"
         env:
           INPUT_VERSION: ${{ inputs.version }}
 
@@ -329,17 +490,21 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           if git diff --quiet; then
-            echo "No changes to commit — repo already at ${{ inputs.version }}."
+            echo "No changes to commit — repo already at ${{ steps.derive.outputs.version }}."
             exit 0
           fi
           git add -A
-          git commit -m "Bump Docker image version to ${{ inputs.version }}"
+          git commit -m "Bump Docker image version to ${{ steps.derive.outputs.version }}"
           git push origin HEAD:${{ github.ref_name }}
 
       - name: Summary
         run: |
           {
-            echo "## Docker images ${{ inputs.version }} (${{ inputs.platform }})"
+            echo "## Docker images ${{ steps.derive.outputs.version }} (${{ inputs.platform }})"
             echo ""
             echo "Pushed to Docker Hub (beehivelab org) and version bump committed to \`${{ github.ref_name }}\`."
+            if [[ "${{ inputs.build_jdk22plus }}" == "true" ]]; then
+              echo ""
+              echo "jdk22plus (experimental, best-effort): see the nvidia-jdk22plus / intel-jdk22plus and push-*-jdk22plus jobs above for their individual outcomes."
+            fi
           } >> "$GITHUB_STEP_SUMMARY"

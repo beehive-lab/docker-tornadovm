@@ -1,0 +1,87 @@
+## Docker File for TornadoVM on Intel Integrated GPUs, unified "jdk22plus" profile.
+## OpenCL backend only.
+##
+## EXPERIMENTAL — best-effort profile, run as its own opt-in job in the GitHub workflow
+## (build_jdk22plus input), not gated to the same correctness bar as the stable JDK21
+## images, and not bumped by bump-version.sh (its TornadoVM ref comes in via the
+## TORNADO_TAG build-arg, supplied by build.sh/the workflow). Builds via the `make
+## jdk22plus BACKEND=opencl` Makefile target (jdk25/jdk26/jdk27 are kept as aliases of
+## the same target — TornadoVM collapsed its per-version JDK25+ profiles into one
+## jdk22plus SDK that runs unchanged on JDK 22 through 27 and later; the build JDK below
+## is pinned to 25 purely to match convention elsewhere in this project, not a
+## requirement — any JDK >= 22 produces an identical artifact). Still needs a JDK 21
+## (JVMCI_SOURCE_JDK) to vendor jdk.internal.vm.ci, which JDK 22+ no longer ships (see
+## openjdk/jdk#30834). Unlike the NVIDIA build of this profile, this Intel variant has
+## not been validated upstream — the OpenCL/reflection path is vendor-neutral, but treat
+## this image as unverified.
+
+FROM intel/oneapi-basekit
+
+LABEL MAINTAINER Thanos Stratikopoulos <athanasios.stratikopoulos@manchester.ac.uk>
+
+## TornadoVM ref to check out — override with --build-arg TORNADO_TAG=... (the build
+## scripts/workflow pass this in explicitly; the default here is only for standalone
+## `docker build` runs of this file).
+ARG TORNADO_TAG=v6.1.0
+
+RUN apt-get update && apt-get install -y python3 python3-pip build-essential cmake vim git \
+    wget opencl-headers apt-utils
+
+RUN ln -s /usr/bin/python3 /usr/bin/python
+RUN python3 -m venv /opt/venv \
+ && /opt/venv/bin/pip install --upgrade pip \
+ && /opt/venv/bin/pip install wget rich streamlit packaging requests tqdm urllib3
+
+ENV PATH="/opt/venv/bin:$PATH"
+
+## OpenCL configuration
+RUN ln -s /usr/lib/x86_64-linux-gnu/libOpenCL.so.1 /usr/lib/x86_64-linux-gnu/libOpenCL.so
+ENV OpenCL_LIBRARY /usr/lib/x86_64-linux-gnu/libOpenCL.so.1
+
+COPY settings/settings_intel.xml /root/.m2/settings.xml
+
+## JDK 21 — source for the vendored jdk.internal.vm.ci module (the jdk22plus Maven
+## profile's jvmci-vendoring step repackages its jvmci classes into a same-named
+## application module, since JDK 22+ no longer ships one). Pulled as a GA Temurin
+## tarball rather than apt — not guaranteed to be packaged on every base image this
+## Dockerfile might run on (confirmed missing on the NVIDIA variant's Ubuntu 18.04 base).
+RUN wget -q -O /tmp/jdk21.tar.gz \
+        "https://api.adoptium.net/v3/binary/latest/21/ga/linux/x64/jdk/hotspot/normal/eclipse" \
+    && mkdir -p /opt/jdk21 \
+    && tar xzf /tmp/jdk21.tar.gz -C /opt/jdk21 --strip-components=1 \
+    && rm /tmp/jdk21.tar.gz
+ENV JVMCI_SOURCE_JDK=/opt/jdk21
+
+## JDK 25 — the build/run JDK for this profile (any GA JDK >= 22 works identically; see
+## the header comment). Pulled the same way, via Adoptium's stable "latest" redirect.
+RUN wget -q -O /tmp/jdk25.tar.gz \
+        "https://api.adoptium.net/v3/binary/latest/25/ga/linux/x64/jdk/hotspot/normal/eclipse" \
+    && mkdir -p /opt/jdk25 \
+    && tar xzf /tmp/jdk25.tar.gz -C /opt/jdk25 --strip-components=1 \
+    && rm /tmp/jdk25.tar.gz
+ENV JAVA_HOME=/opt/jdk25
+ENV PATH=$JAVA_HOME/bin:$PATH
+
+RUN java -version
+RUN javac -version
+
+## Setup TornadoVM
+WORKDIR /tornado/
+COPY settings/settings.xml /root/.m2/settings.xml
+WORKDIR /tornado/
+RUN git clone https://github.com/beehive-lab/TornadoVM.git tornado
+WORKDIR /tornado/tornado
+RUN git fetch --all --tags && git checkout "${TORNADO_TAG}"
+ENV CMAKE_ROOT=/usr
+RUN make jdk22plus BACKEND=opencl
+SHELL ["/bin/bash", "-c", "source /tornado/tornado/setvars.sh"]
+
+## TORNADOVM_HOME is always <repo>/bin/sdk for a plain `make`/`bin/compile` build (no
+## --sdk archive step).
+ENV TORNADOVM_HOME /tornado/tornado/bin/sdk
+ENV PATH $TORNADOVM_HOME/bin:$PATH
+ENV TORNADO_ROOT /tornado/tornado
+ENV DOCKER_FPGA_EMULATION 1
+
+WORKDIR /data
+VOLUME ["/data"]
