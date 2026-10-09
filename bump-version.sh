@@ -1,28 +1,24 @@
 #!/usr/bin/env bash
 # bump-version.sh
-# One-click script to update the TornadoVM version across all files.
+# Updates the TornadoVM release version used by the supported NVIDIA images.
 #
 # Usage:
 #   ./bump-version.sh <new-version>
-#   ./bump-version.sh 2.2.0
+#   ./bump-version.sh 7.2.0
 #
 # What it updates:
-#   - build.sh                                        (TAG_VERSION=)
-#   - push.sh                                         (tag=)
-#   - push-intel.sh                                   (tag=)
-#   - dockerFiles/Dockerfile.*                        (git checkout tags/v)
-#   - example/pom.xml                                 (tornado-api / tornado-matrices versions)
+#   - build.sh                                        (TORNADOVM_VERSION default)
+#   - dockerFiles/Dockerfile.nvidia.{cuda,opencl}.{jdk21,jdk22plus}   (ARG TORNADO_TAG default)
+#   - example/pom.xml                                 (tornado-api / tornado-matrices, X.Y.Z-jdk21)
+#   - README.md                                       (image tag examples)
 #
-# NOT touched by this script (deliberately):
-#   - polyglotImages/**                               DEPRECATED — frozen at v5.2.0-jdk21, the
-#                                                       last TornadoVM release with polyglot
-#                                                       GraalVM Truffle-language support. See
-#                                                       polyglotImages/README.md.
-#   - dockerFiles/Dockerfile.*.jdk22plus               EXPERIMENTAL — versioned independently
-#                                                       via the TORNADO_TAG build-arg (see
-#                                                       build.sh's TAG_VERSION_JDK22PLUS and the
-#                                                       Dockerfiles' header comments), not a
-#                                                       beehive-lab release tag yet.
+# NOT touched by this script (deliberately): the DEPRECATED images — build.sh's
+# TAG_VERSION / TAG_VERSION_JDK22PLUS, push.sh, push-intel.sh, the source-built
+# Dockerfile.nvidia.jdk21 / *.graalvm.* / *.oneapi.* Dockerfiles and
+# polyglotImages/** (frozen at v5.2.0-jdk21). See README.md.
+#
+# Note: example/target/example-1.0-SNAPSHOT.jar is not rebuilt here; the GitHub workflow
+# rebuilds it with Maven after running this script.
 
 set -euo pipefail
 
@@ -31,12 +27,16 @@ cd "$SCRIPT_DIR"
 
 # ── helpers ──────────────────────────────────────────────────────────────────
 
+current_version() {
+    sed -n 's/^TORNADOVM_VERSION="${TORNADOVM_VERSION:-\([^}]*\)}"$/\1/p' build.sh
+}
+
 usage() {
     echo "Usage: $0 <new-version>"
     echo ""
-    echo "  new-version   SemVer string, e.g. 2.2.0"
+    echo "  new-version   TornadoVM release version X.Y.Z, e.g. 7.2.0"
     echo ""
-    echo "Current version detected from build.sh: $(grep 'TAG_VERSION=' build.sh | head -1 | cut -d'=' -f2)"
+    echo "Current version detected from build.sh: $(current_version)"
     exit 1
 }
 
@@ -58,13 +58,11 @@ replace_in_file() {
 
 NEW_VERSION="$1"
 
-# Validate semver-ish (digits and dots only)
-# Allow X.Y.Z or X.Y.Z-suffix (e.g., -jdk21)
-if ! [[ "$NEW_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9]+)?$ ]]; then
-    die "Version must be X.Y.Z or X.Y.Z-suffix (e.g. 2.2.0 or 2.2.0-jdk21), got: $NEW_VERSION"
+if ! [[ "$NEW_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    die "Version must be a bare release version X.Y.Z (e.g. 7.2.0), got: $NEW_VERSION"
 fi
-# Auto-detect current version from build.sh
-CURRENT_VERSION=$(grep 'TAG_VERSION=' build.sh | head -1 | cut -d'=' -f2 | tr -d '[:space:]')
+
+CURRENT_VERSION=$(current_version)
 [[ -z "$CURRENT_VERSION" ]] && die "Could not detect current version from build.sh"
 
 if [[ "$CURRENT_VERSION" == "$NEW_VERSION" ]]; then
@@ -75,37 +73,33 @@ fi
 echo "Bumping: $CURRENT_VERSION  →  $NEW_VERSION"
 echo ""
 
-# ── build / push scripts ──────────────────────────────────────────────────────
+# ── build.sh ─────────────────────────────────────────────────────────────────
 
-replace_in_file "build.sh"                     "TAG_VERSION=${CURRENT_VERSION}" "TAG_VERSION=${NEW_VERSION}"
-replace_in_file "push.sh"                      "tag=${CURRENT_VERSION}"         "tag=${NEW_VERSION}"
-replace_in_file "push-intel.sh"                "tag=${CURRENT_VERSION}"         "tag=${NEW_VERSION}"
+replace_in_file "build.sh" "TORNADOVM_VERSION:-${CURRENT_VERSION}}" "TORNADOVM_VERSION:-${NEW_VERSION}}"
+replace_in_file "build.sh" "TORNADOVM_VERSION=${CURRENT_VERSION} " "TORNADOVM_VERSION=${NEW_VERSION} "
 
 # ── Dockerfiles ───────────────────────────────────────────────────────────────
-# polyglotImages/** and dockerFiles/Dockerfile.*.jdk22plus are deliberately excluded —
-# see the header comment.
 
 DOCKERFILES=(
-    dockerFiles/Dockerfile.nvidia.jdk21
-    dockerFiles/Dockerfile.nvidia.graalvm.jdk21
-    dockerFiles/Dockerfile.oneapi.intel.jdk21
-    dockerFiles/Dockerfile.oneapi.intel.graalvm.jdk21
+    dockerFiles/Dockerfile.nvidia.cuda.jdk21
+    dockerFiles/Dockerfile.nvidia.cuda.jdk22plus
+    dockerFiles/Dockerfile.nvidia.opencl.jdk21
+    dockerFiles/Dockerfile.nvidia.opencl.jdk22plus
 )
 
 for f in "${DOCKERFILES[@]}"; do
-    replace_in_file "$f" "checkout tags/v${CURRENT_VERSION}" "checkout tags/v${NEW_VERSION}"
+    replace_in_file "$f" "ARG TORNADO_TAG=v${CURRENT_VERSION}" "ARG TORNADO_TAG=v${NEW_VERSION}"
 done
 
 # ── example/pom.xml ───────────────────────────────────────────────────────────
 # Only touch the tornado-api and tornado-matrices <version> blocks.
 
 POM="example/pom.xml"
-if grep -q "<version>${CURRENT_VERSION}</version>" "$POM"; then
-    # Multi-line sed: for each TornadoVM artifact, replace the following <version> line.
+if grep -q "<version>${CURRENT_VERSION}-jdk21</version>" "$POM"; then
     for artifact in tornado-api tornado-matrices; do
         sed -i "/<artifactId>${artifact}<\/artifactId>/{
             n
-            s|<version>${CURRENT_VERSION}</version>|<version>${NEW_VERSION}</version>|
+            s|<version>${CURRENT_VERSION}-jdk21</version>|<version>${NEW_VERSION}-jdk21</version>|
         }" "$POM"
     done
     echo "  [updated] $POM"
@@ -113,15 +107,17 @@ else
     echo "  [skip]    $POM  (pattern not found)"
 fi
 
+# ── README.md ─────────────────────────────────────────────────────────────────
+
+replace_in_file "README.md" "\`${CURRENT_VERSION}\`" "\`${NEW_VERSION}\`"
+replace_in_file "README.md" "TORNADOVM_VERSION=${CURRENT_VERSION} " "TORNADOVM_VERSION=${NEW_VERSION} "
+
 # ── done ──────────────────────────────────────────────────────────────────────
 
 echo ""
-echo "Done. All files updated to $NEW_VERSION."
+echo "Done. Supported images now target TornadoVM v$NEW_VERSION."
 echo ""
 echo "Next steps:"
-echo "  Build all images  :  ./buildAll.sh intel   OR   ./buildAll.sh nvidia"
-echo "  Push all images   :  ./push.sh"
-echo "  Push Intel only   :  ./push-intel.sh"
-echo ""
-echo "Not bumped (see header comment): polyglotImages/** (deprecated, frozen) and"
-echo "dockerFiles/Dockerfile.*.jdk22plus (experimental, commit-pinned)."
+echo "  Rebuild the example :  (cd example && mvn clean package)"
+echo "  Build an image      :  ./build.sh --nvidia-cuda-jdk25"
+echo "  Or run the 'Build, Test & Push Docker Images' GitHub workflow with version v$NEW_VERSION."

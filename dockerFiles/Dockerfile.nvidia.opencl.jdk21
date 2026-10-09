@@ -1,0 +1,61 @@
+## Docker File for TornadoVM on NVIDIA GPUs — OpenCL backend, Eclipse Temurin JDK 21.
+## Image: beehivelab/tornadovm-nvidia-opencl-jdk21
+##
+## No source build: TornadoVM is installed from the release's prebuilt
+## tornadovm-<ver>-jdk21-opencl-linux-amd64 SDK (compiled with --enable-preview, which
+## bin/tornado adds at run time on its own).
+##
+## The OpenCL backend has no JNI library of its own: it calls the OpenCL ICD loader
+## (libOpenCL.so.1) through java.lang.foreign. So the image only needs the loader plus an
+## ICD entry pointing at NVIDIA's OpenCL driver (libnvidia-opencl.so.1), which the NVIDIA
+## container runtime mounts in from the host for the "compute" driver capability.
+
+FROM ubuntu:24.04
+
+LABEL MAINTAINER Thanos Stratikopoulos <athanasios.stratikopoulos@manchester.ac.uk>
+
+## TornadoVM release to install, as vX.Y.Z — override with --build-arg TORNADO_TAG=...
+## (build.sh and the workflow pass this in explicitly).
+ARG TORNADO_TAG=v7.2.0
+
+RUN apt-get update -q && apt-get install -qy --no-install-recommends \
+        python3 wget unzip ca-certificates ocl-icd-libopencl1 clinfo \
+    && rm -rf /var/lib/apt/lists/*
+
+## Register NVIDIA's OpenCL driver with the ICD loader, and ask the NVIDIA container
+## runtime to expose the GPUs and mount the compute (CUDA + OpenCL) driver libraries.
+RUN mkdir -p /etc/OpenCL/vendors && echo "libnvidia-opencl.so.1" > /etc/OpenCL/vendors/nvidia.icd
+ENV NVIDIA_VISIBLE_DEVICES=all \
+    NVIDIA_DRIVER_CAPABILITIES=compute,utility
+
+# Set UTF-8 locale env vars
+ENV LANG=C.UTF-8 \
+    LC_ALL=C.UTF-8
+
+## Eclipse Temurin JDK 21, GA tarball from Adoptium (latest 21 build).
+RUN wget -q -O /tmp/jdk.tar.gz \
+        "https://api.adoptium.net/v3/binary/latest/21/ga/linux/x64/jdk/hotspot/normal/eclipse" \
+    && mkdir -p /opt/jdk \
+    && tar xzf /tmp/jdk.tar.gz -C /opt/jdk --strip-components=1 \
+    && rm /tmp/jdk.tar.gz
+ENV JAVA_HOME=/opt/jdk
+
+## TornadoVM SDK — the archive unpacks to tornadovm-<ver>-opencl/, moved to a fixed path.
+## tornado-argfile is pre-expanded here: bin/tornado otherwise writes it into
+## TORNADOVM_HOME on first run, which fails when the container runs as a non-root --user.
+## Likewise var/ (CUDA code cache, OpenCL logs/cache) is created world-writable up front.
+RUN TORNADO_VERSION="${TORNADO_TAG#v}" \
+    && wget -q -O /tmp/tornadovm.zip \
+        "https://github.com/beehive-lab/TornadoVM/releases/download/${TORNADO_TAG}/tornadovm-${TORNADO_VERSION}-jdk21-opencl-linux-amd64.zip" \
+    && unzip -q /tmp/tornadovm.zip -d /opt \
+    && mv "/opt/tornadovm-${TORNADO_VERSION}-opencl" /opt/tornadovm \
+    && rm /tmp/tornadovm.zip \
+    && sed 's|${TORNADOVM_HOME}|/opt/tornadovm|g' /opt/tornadovm/tornado-argfile.template \
+        > /opt/tornadovm/tornado-argfile \
+    && mkdir -p /opt/tornadovm/var && chmod 1777 /opt/tornadovm/var
+ENV TORNADOVM_HOME=/opt/tornadovm
+ENV PATH=$TORNADOVM_HOME/bin:$JAVA_HOME/bin:$PATH
+
+WORKDIR /data
+VOLUME ["/data"]
+EXPOSE 3000
