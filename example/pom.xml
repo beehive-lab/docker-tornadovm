@@ -11,13 +11,6 @@
   <name>example</name>
   <url>https://www.tornadovm.org/</url>
 
-  <repositories>
-    <repository>
-        <id>universityOfManchester-graal</id>
-        <url>https://raw.githubusercontent.com/beehive-lab/tornado/maven-tornadovm</url>
-    </repository>
-  </repositories>
-
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
@@ -27,14 +20,14 @@
 
   <dependencies>
     <dependency>
-      <groupId>tornado</groupId>
+      <groupId>io.github.beehive-lab</groupId>
       <artifactId>tornado-api</artifactId>
-      <version>7.0.0-jdk21</version>
+      <version>7.2.0-jdk21</version>
     </dependency>
     <dependency>
-      <groupId>tornado</groupId>
+      <groupId>io.github.beehive-lab</groupId>
       <artifactId>tornado-matrices</artifactId>
-      <version>7.0.0-jdk21</version>
+      <version>7.2.0-jdk21</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>

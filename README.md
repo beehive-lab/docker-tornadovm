@@ -2,13 +2,14 @@
 
 [![](https://img.shields.io/badge/License-Apache%202.0-orange.svg)](https://opensource.org/licenses/Apache-2.0)
 
-We have two docker configurations for TornadoVM using 2 different JDKs:
-
-* TornadoVM Docker for **NVIDIA GPUs**: See [instructions](https://github.com/beehive-lab/docker-tornadovm#nvidia-gpus)
+* TornadoVM Docker for **NVIDIA GPUs** (✅ **supported**, TornadoVM `7.2.0`): See [instructions](https://github.com/beehive-lab/docker-tornadovm#nvidia-gpus)
+    * Backends: CUDA and OpenCL
     * JDKs supported:
-	    * TornadoVM with OpenJDK 21
-		* TornadoVM with GraalVM 23.1.0 and JDK 21
-* TornadoVM Docker for **Intel Integrated Graphics, Intel CPUs, and Intel FPGAs (Emulated Mode)**: See [instructions](https://github.com/beehive-lab/docker-tornadovm#intel-integrated-graphics)
+	    * TornadoVM with Eclipse Temurin JDK 21
+	    * TornadoVM with Eclipse Temurin JDK 25 (LTS)
+	    * TornadoVM with Eclipse Temurin JDK 27 (latest)
+
+* TornadoVM Docker for **Intel Integrated Graphics, Intel CPUs, and Intel FPGAs (Emulated Mode)** (⚠️ **deprecated**, no longer built or published): See [instructions](https://github.com/beehive-lab/docker-tornadovm#intel-integrated-graphics)
     * JDKs supported:
 	    * TornadoVM with OpenJDK 21
 		* TornadoVM with GraalVM 23.1.0 and JDK 21
@@ -17,69 +18,101 @@ We have two docker configurations for TornadoVM using 2 different JDKs:
     * JDKs supported:
 	    * TornadoVM with GraalVM 23.1.0 JDK 21
 
-* TornadoVM Docker for **NVIDIA/Intel GPUs, JVMCI-free JDK 27+** (⚠️ **experimental**, best-effort): See [instructions](https://github.com/beehive-lab/docker-tornadovm#jdk-27-jvmci-free-experimental)
-    * JDKs supported:
-	    * TornadoVM with JDK 27 (JVMCI removed from the platform; TornadoVM supplies it itself — see `dockerFiles/Dockerfile.*.jdk22plus`)
+* TornadoVM Docker for **Intel GPUs, JVMCI-free JDK 27+** (⚠️ **deprecated**, no longer built or published): See [instructions](https://github.com/beehive-lab/docker-tornadovm#jdk-27-jvmci-free)
 
 ## Nvidia GPUs
 
 ### Prerequisites
 
-The `tornadovm-nvidia-openjdk` docker image needs the docker `nvidia` daemon.  More info here: [https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html).
+The NVIDIA images need the NVIDIA Container Toolkit (the docker `nvidia` runtime) and a host driver that supports CUDA 13. More info here: [https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html).
 
 ### How to run?
 
-#### 1) Pull the image
+#### 1) Pull an image
 
-For the `tornadovm-nvidia-openjdk` image:
+There is one image per TornadoVM backend and JDK, each built from the prebuilt TornadoVM release SDK and Eclipse Temurin. These are the only images that are currently built, tested and published:
+
+| Image | Backend | JDK | TornadoVM SDK | Dockerfile |
+|-------|---------|-----|---------------|------------|
+| `beehivelab/tornadovm-nvidia-cuda-jdk21` | CUDA (PTX) | Temurin 21 | jdk21 | [`Dockerfile.nvidia.cuda.jdk21`](dockerFiles/Dockerfile.nvidia.cuda.jdk21) |
+| `beehivelab/tornadovm-nvidia-cuda-jdk25` | CUDA (PTX) | Temurin 25 (LTS) | jdk22plus | [`Dockerfile.nvidia.cuda.jdk22plus`](dockerFiles/Dockerfile.nvidia.cuda.jdk22plus) |
+| `beehivelab/tornadovm-nvidia-cuda-jdk27` | CUDA (PTX) | Temurin 27 | jdk22plus | [`Dockerfile.nvidia.cuda.jdk22plus`](dockerFiles/Dockerfile.nvidia.cuda.jdk22plus) |
+| `beehivelab/tornadovm-nvidia-opencl-jdk21` | OpenCL | Temurin 21 | jdk21 | [`Dockerfile.nvidia.opencl.jdk21`](dockerFiles/Dockerfile.nvidia.opencl.jdk21) |
+| `beehivelab/tornadovm-nvidia-opencl-jdk25` | OpenCL | Temurin 25 (LTS) | jdk22plus | [`Dockerfile.nvidia.opencl.jdk22plus`](dockerFiles/Dockerfile.nvidia.opencl.jdk22plus) |
+| `beehivelab/tornadovm-nvidia-opencl-jdk27` | OpenCL | Temurin 27 | jdk22plus | [`Dockerfile.nvidia.opencl.jdk22plus`](dockerFiles/Dockerfile.nvidia.opencl.jdk22plus) |
+
+The `jdk22plus` Dockerfiles take the JDK as a build argument (`JDK_VERSION`, default 25). The current LTS and the latest JDK are published; other JDKs from 22 up can be built locally, e.g. `./build.sh --nvidia-cuda-jdk26`, but are not tested or published. Non-LTS JDKs stop receiving security updates once the next release ships.
+
 ```bash
-$ docker pull beehivelab/tornadovm-nvidia-openjdk:latest
+$ docker pull beehivelab/tornadovm-nvidia-cuda-jdk25:latest
 ```
 
-This image uses the latest TornadoVM for NVIDIA GPUs and OpenJDK 21.
+Each image is tagged with the TornadoVM release version (e.g. `7.2.0`) and `latest`.
 
 #### 2) Run an experiment
 
-We provide a runner script that compiles and run your Java programs with TornadoVM. Here's an example:
+We provide a runner script that runs your Java programs with TornadoVM. Select the image with `TORNADOVM_IMAGE` (`cuda-jdk21`, `cuda-jdk25`, `cuda-jdk27`, `opencl-jdk21`, `opencl-jdk25` or `opencl-jdk27`; default `cuda-jdk25`). Here's an example:
 
 ```bash
 $ git clone https://github.com/beehive-lab/docker-tornadovm
 $ cd docker-tornadovm
 
 ## Run Matrix Multiplication - provided in the docker-tornadovm repository
-$ ./run_nvidia_openjdk.sh tornado -cp example/target/example-1.0-SNAPSHOT.jar example.MatrixMultiplication 2048
+$ ./run_nvidia.sh tornado -cp example/target/example-1.0-SNAPSHOT.jar example.MatrixMultiplication 512
 
-Computing MxM of 2048x2048
-	CPU Execution: 0.36 GFlops, Total time = 48254 ms
-	GPU Execution: 277.09 GFlops, Total Time = 62 ms
-	Speedup: 778x 
+## Same, on the OpenCL backend with JDK 21
+$ TORNADOVM_IMAGE=opencl-jdk21 ./run_nvidia.sh tornado -cp example/target/example-1.0-SNAPSHOT.jar example.MatrixMultiplication 512
 ```
 
-### Using TornadoVM with GraalVM for NVIDIA GPUs
+The example also runs a single-threaded CPU baseline 100 times, so large sizes (e.g. 2048) take tens of minutes.
 
-With JDK 21:
+Your application must be compiled against the same TornadoVM release as the image. TornadoVM is on Maven Central as `io.github.beehive-lab:tornado-api` (see [`example/pom.xml`](example/pom.xml)). Otherwise it fails with `Kernel entry ... has no writeReplace()`.
+
+#### Build the images locally
 
 ```bash
-$ docker pull beehivelab/tornadovm-nvidia-graalvm:latest
+$ ./build.sh --nvidia-cuda-jdk25   # or --nvidia-{cuda,opencl}-jdk{21,25,27}
+$ TORNADOVM_VERSION=7.2.0 ./build.sh --nvidia-opencl-jdk25   # pick the TornadoVM release
 ```
+
+#### Release a new version
+
+Run the **Build, Test & Push Docker Images** GitHub workflow with the TornadoVM release version (e.g. `v7.2.0`). It builds and smoke-tests the six images above on a GPU runner. If `push_images` is checked, it then pushes them to Docker Hub and commits the version bump (via `bump-version.sh`, plus a rebuilt example jar) back to the branch.
+
+### Deprecated Dockerfiles
+
+These Dockerfiles are kept for reference and manual builds only. They are not built by the GitHub workflow, not updated by `bump-version.sh`, and not published any more.
+
+| Dockerfile | Image | Notes |
+|------------|-------|-------|
+| [`Dockerfile.nvidia.jdk21`](dockerFiles/Dockerfile.nvidia.jdk21) | `beehivelab/tornadovm-nvidia-openjdk` | Source build, OpenCL. Replaced by `tornadovm-nvidia-opencl-jdk21` |
+| [`Dockerfile.nvidia.graalvm.jdk21`](dockerFiles/Dockerfile.nvidia.graalvm.jdk21) | `beehivelab/tornadovm-nvidia-graalvm` | GraalVM 23.1.0 JDK 21 |
+| [`Dockerfile.oneapi.intel.jdk21`](dockerFiles/Dockerfile.oneapi.intel.jdk21) | `beehivelab/tornadovm-intel-openjdk` | Intel GPUs/CPUs/FPGA emulation |
+| [`Dockerfile.oneapi.intel.graalvm.jdk21`](dockerFiles/Dockerfile.oneapi.intel.graalvm.jdk21) | `beehivelab/tornadovm-intel-graalvm` | Intel, GraalVM 23.1.0 JDK 21 |
+| [`Dockerfile.oneapi.intel.jdk22plus`](dockerFiles/Dockerfile.oneapi.intel.jdk22plus) | `beehivelab/tornadovm-intel-jdk22plus` | Experimental, unvalidated |
+| [`polyglotImages/`](polyglotImages) | `beehivelab/tornadovm-polyglot-*` | Frozen at v5.2.0-jdk21 |
+
+`beehivelab/tornadovm-nvidia-jdk22plus` has been replaced by the `tornadovm-nvidia-{cuda,opencl}-jdk{25,27}` images.
 
 ### Some options
 
 ```bash
-# To see the generated OpenCL kernel
-$ ./run_nvidia.sh tornado --printKernel example/MatrixMultiplication
+# To see the generated kernel
+$ ./run_nvidia.sh tornado --printKernel -cp example/target/example-1.0-SNAPSHOT.jar example.MatrixMultiplication
 
 # To check some runtime info about the kernel execution and device
-$ ./run_nvidia.sh tornado --debug example/MatrixMultiplication
+$ ./run_nvidia.sh tornado --threadInfo -cp example/target/example-1.0-SNAPSHOT.jar example.MatrixMultiplication
 ```
 
 The `tornado` command is just an alias to the `java` command with all the parameters for TornadoVM execution. So you can pass any Java (OpenJDK or Hotspot) parameter.
 
 ```bash
-$ ./run_nvidia.sh tornado --jvm="-Xmx16g -Xms16g" example/MatrixMultiplication
+$ ./run_nvidia.sh tornado --jvm="-Xmx16g -Xms16g" -cp example/target/example-1.0-SNAPSHOT.jar example.MatrixMultiplication
 ```
 
 ## Intel Integrated Graphics
+
+> ⚠️ **Deprecated:** the Intel images (`tornadovm-intel-openjdk`, `tornadovm-intel-graalvm`) are no longer built or published. The instructions below apply to previously published tags and manual builds.
 
 ### Prerequisites
 
@@ -226,16 +259,10 @@ $ ./polyglotImages/polyglot-truffleruby/tornadovm-polyglot.sh tornado --printKer
 
 ## JDK 27+ (JVMCI-free)
 
-Build:
-```bash
-$ ./build.sh --nvidia-jdk22plus   # or --intel-jdk22plus (unvalidated)
-```
+⚠️ Deprecated: the Intel `tornadovm-intel-jdk22plus` image is no longer built or published. For JDK 22+ on NVIDIA GPUs, use the `*-jdk25` / `*-jdk27` images above.
 
-Run (same runner pattern as the JDK21 images, using the `tornadovm-*-jdk22plus` image):
 ```bash
-$ docker run --runtime=nvidia --rm -i --user="$(id -u):$(id -g)" --net=none -v "$PWD":/data \
-    beehivelab/tornadovm-nvidia-jdk22plus:latest \
-    tornado -cp example/target/example-1.0-SNAPSHOT.jar example.MatrixMultiplication
+$ ./build.sh --intel-jdk22plus   # manual build only (unvalidated)
 ```
 
 Enjoy TornadoVM! 
