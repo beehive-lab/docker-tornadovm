@@ -113,9 +113,15 @@ jobs:
             docker run --runtime=nvidia --rm -i --user="$(id -u):$(id -g)" --net=none \
               -v "$WORK":/data "$IMAGE:${{ steps.derive.outputs.version }}" "$@"
           }
-          run bash -c 'CP=$(ls $TORNADOVM_HOME/share/java/tornado/tornado-{api,matrices}-*.jar | paste -sd:) \
-            && javac --release 21 -cp "$CP" -d classes MatrixMultiplication.java \
-            && jar cf example.jar -C classes .'
+          # The host driver as seen from the container (driver version, max CUDA version).
+          run nvidia-smi || echo "::warning::nvidia-smi failed inside $IMAGE"
+          # The jdk21 SDK's tornado-api uses Java 21 preview features (FFM), so compiling
+          # against it needs --enable-preview; the jdk22plus SDK's does not.
+          PREVIEW=""
+          if [[ "${{ matrix.jdk }}" == 21 ]]; then PREVIEW="--enable-preview"; fi
+          run bash -c "CP=\$(ls \$TORNADOVM_HOME/share/java/tornado/tornado-{api,matrices}-*.jar | paste -sd:) \
+            && javac --release 21 $PREVIEW -cp \"\$CP\" -d classes MatrixMultiplication.java \
+            && jar cf example.jar -C classes ."
           run tornado --version 2>&1 | tee "$LOG_PREFIX-version.log"
           run tornado --devices 2>&1 | tee "$LOG_PREFIX-devices.log"
           run tornado --threadInfo -cp example.jar example.MatrixMultiplication 512 2>&1 | tee "$LOG_PREFIX-matmul.log"
