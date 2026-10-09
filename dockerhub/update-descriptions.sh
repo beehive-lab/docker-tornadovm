@@ -109,8 +109,12 @@ if [[ "$WHICH" == active || "$WHICH" == all ]]; then
     for backend in cuda opencl; do
         if [[ $backend == cuda ]]; then
             BACKEND_NAME="CUDA (PTX)"; KERNEL_LANG=PTX
+            GPU_REQUIREMENT='An NVIDIA GPU of the Turing generation or newer (compute capability 7.5+), with a host driver that supports CUDA 13 (R580 or newer). CUDA 13 does not support Maxwell, Pascal or Volta GPUs: use the `tornadovm-nvidia-opencl-*` images on those.'
+            NO_DEVICES_HINT='check `nvidia-smi --query-gpu=name,compute_cap,driver_version --format=csv` on the host. The GPU must have compute capability 7.5 or higher and the driver must be R580 or newer. On older GPUs, use the OpenCL images.'
         else
             BACKEND_NAME=OpenCL; KERNEL_LANG="OpenCL C"
+            GPU_REQUIREMENT='An NVIDIA GPU with a current NVIDIA driver. Older GPUs, such as Pascal and Volta, are supported.'
+            NO_DEVICES_HINT='check that `nvidia-smi` works on the host and that the driver is up to date.'
         fi
         for jdk in "${ACTIVE_JDKS[@]}"; do
             repo="tornadovm-nvidia-$backend-jdk$jdk"
@@ -118,7 +122,7 @@ if [[ "$WHICH" == active || "$WHICH" == all ]]; then
             [[ $jdk == "$LTS_JDK" ]] && JDK_NOTE=" (LTS)"
             render dockerhub/active.md \
                 "IMAGE=$NAMESPACE/$repo" "SHORT=$backend-jdk$jdk" "BACKEND_NAME=$BACKEND_NAME" \
-                "KERNEL_LANG=$KERNEL_LANG" "JDK=$jdk" "JDK_NOTE=$JDK_NOTE" "VERSION=$VERSION" \
+                "KERNEL_LANG=$KERNEL_LANG" "GPU_REQUIREMENT=$GPU_REQUIREMENT" "NO_DEVICES_HINT=$NO_DEVICES_HINT" "JDK=$jdk" "JDK_NOTE=$JDK_NOTE" "VERSION=$VERSION" \
                 > "$TMP/$repo.md"
             publish "$repo" "TornadoVM for NVIDIA GPUs: ${BACKEND_NAME} backend on Eclipse Temurin JDK $jdk" "$TMP/$repo.md"
         done
