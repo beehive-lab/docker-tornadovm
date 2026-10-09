@@ -3,13 +3,30 @@ name: Update Docker Hub Descriptions
 # Updates the overview pages of the beehivelab TornadoVM images on Docker Hub from
 # dockerhub/active.md and dockerhub/frozen.md (see dockerhub/update-descriptions.sh).
 #
-#   active  the supported images; the release workflow also does this after each push
-#   frozen  the deprecated images, marked as no longer maintained (normally run once)
+#   active  the supported images
+#   frozen  the deprecated images, marked as no longer maintained
+#   all     both
+#
+# Runs automatically at the end of "Build, Test & Push Docker Images", after a push in
+# which every image passed (with images=all and the released version), and can also be
+# run by hand.
 #
 # Requires repo secrets DOCKERHUB_USERNAME / DOCKERHUB_TOKEN with admin rights on the
 # beehivelab repositories.
 
 on:
+  workflow_call:
+    inputs:
+      images:
+        description: 'Which overview pages to update: active, frozen or all.'
+        required: false
+        type: string
+        default: all
+      version:
+        description: 'TornadoVM release shown on the active pages, vX.Y.Z. Defaults to build.sh.'
+        required: false
+        type: string
+        default: ''
   workflow_dispatch:
     inputs:
       images:
@@ -18,6 +35,11 @@ on:
         type: choice
         options: [active, frozen, all]
         default: all
+      version:
+        description: 'TornadoVM release shown on the active pages, vX.Y.Z (leave empty for the version in build.sh).'
+        required: false
+        type: string
+        default: ''
 
 jobs:
   update:
@@ -29,7 +51,12 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Update overview pages
-        run: dockerhub/update-descriptions.sh "${{ inputs.images }}"
+        run: |
+          if [[ -n "$INPUT_VERSION" ]]; then export TORNADOVM_VERSION="${INPUT_VERSION#v}"; fi
+          dockerhub/update-descriptions.sh "$INPUT_IMAGES"
+          echo "Updated the Docker Hub overview pages ($INPUT_IMAGES)." >> "$GITHUB_STEP_SUMMARY"
         env:
+          INPUT_IMAGES: ${{ inputs.images }}
+          INPUT_VERSION: ${{ inputs.version }}
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}

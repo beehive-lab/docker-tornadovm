@@ -81,7 +81,7 @@ Run the **Build, Test & Push Docker Images** GitHub workflow with the TornadoVM 
 
 #### Docker Hub pages
 
-The Docker Hub overview pages are generated from [`dockerhub/active.md`](dockerhub/active.md) (supported images) and [`dockerhub/frozen.md`](dockerhub/frozen.md) (deprecated images, marked as frozen). The release workflow refreshes the active pages after each push. To update them by hand, run the **Update Docker Hub Descriptions** workflow, or `dockerhub/update-descriptions.sh <active|frozen|all>`. Add `--dry-run <dir>` to preview the pages locally.
+The Docker Hub overview pages are generated from [`dockerhub/active.md`](dockerhub/active.md) (supported images) and [`dockerhub/frozen.md`](dockerhub/frozen.md) (deprecated images, marked as frozen). The release workflow calls the **Update Docker Hub Descriptions** workflow after each push in which all images passed, which refreshes all pages. To update them by hand, run the **Update Docker Hub Descriptions** workflow, or `dockerhub/update-descriptions.sh <active|frozen|all>`. Add `--dry-run <dir>` to preview the pages locally.
 
 ### Deprecated Dockerfiles
 
