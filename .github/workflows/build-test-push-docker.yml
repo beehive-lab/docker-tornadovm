@@ -35,8 +35,11 @@ name: Build, Test & Push Docker Images
 # rerun.
 #
 # Requires:
-#   - Self-hosted runner(s) with Docker + the NVIDIA container runtime + an NVIDIA GPU
-#     (driver supporting CUDA 13), labeled [self-hosted, docker-tornadovm, nvidia-gpu]
+#   - Self-hosted runners with Docker + the NVIDIA container runtime + an NVIDIA GPU:
+#       CUDA jobs:   labeled [self-hosted, docker-tornadovm, cuda13-gpu]. CUDA 13 needs a
+#                    Turing (compute capability 7.5) or newer GPU and an R580+ driver.
+#       OpenCL jobs: labeled [self-hosted, docker-tornadovm, nvidia-gpu]. Any GPU with a
+#                    current NVIDIA driver, including Pascal.
 #   - Repo secrets DOCKERHUB_USERNAME / DOCKERHUB_TOKEN with push rights to the
 #     beehivelab org (only read when push_images=true)
 #   - A self-hosted runner with Docker, labeled [self-hosted, docker-tornadovm], for the
@@ -62,7 +65,9 @@ concurrency:
 jobs:
   nvidia:
     name: NVIDIA ${{ matrix.backend }} JDK${{ matrix.jdk }}
-    runs-on: [self-hosted, docker-tornadovm, nvidia-gpu]
+    # CUDA 13 does not support Pascal/Volta GPUs, so the CUDA jobs go to a runner with a
+    # Turing-or-newer GPU (cuda13-gpu); the OpenCL jobs run on any NVIDIA runner.
+    runs-on: ${{ matrix.backend == 'cuda' && fromJSON('["self-hosted", "docker-tornadovm", "cuda13-gpu"]') || fromJSON('["self-hosted", "docker-tornadovm", "nvidia-gpu"]') }}
     timeout-minutes: 90
     strategy:
       fail-fast: false

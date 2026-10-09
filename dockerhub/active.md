@@ -11,7 +11,7 @@ Source and issues: [beehive-lab/docker-tornadovm](https://github.com/beehive-lab
 
 ## Prerequisites
 
-- An NVIDIA GPU, with a host driver that supports CUDA 13
+- {{GPU_REQUIREMENT}}
 - The [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html), registered with Docker:
 
 ```bash
@@ -91,7 +91,7 @@ The output should end with `Verification true`.
 ## Troubleshooting
 
 - **`unknown or invalid runtime name: nvidia`**: the NVIDIA Container Toolkit is not installed or not registered with Docker (see Prerequisites).
-- **No devices listed, or driver errors**: the host driver is too old. Check the CUDA version that `nvidia-smi` reports on the host.
+- **No devices listed, or driver errors**: {{NO_DEVICES_HINT}}
 
 ## License
 

@@ -24,7 +24,12 @@
 
 ### Prerequisites
 
-The NVIDIA images need the NVIDIA Container Toolkit (the docker `nvidia` runtime) and a host driver that supports CUDA 13. More info here: [https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html).
+The NVIDIA images need the NVIDIA Container Toolkit (the docker `nvidia` runtime) and:
+
+* **CUDA images** (`*-cuda-*`): a Turing (compute capability 7.5) or newer GPU and a host driver that supports CUDA 13 (R580 or newer). CUDA 13 does not support Maxwell, Pascal or Volta GPUs.
+* **OpenCL images** (`*-opencl-*`): any GPU supported by a current NVIDIA driver, including Pascal and Volta.
+
+ More info here: [https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html).
 
 ### How to run?
 
