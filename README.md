@@ -79,6 +79,10 @@ $ TORNADOVM_VERSION=7.2.0 ./build.sh --nvidia-opencl-jdk25   # pick the TornadoV
 
 Run the **Build, Test & Push Docker Images** GitHub workflow with the TornadoVM release version (e.g. `v7.2.0`). It builds and smoke-tests the six images above on a GPU runner. If `push_images` is checked, it then pushes them to Docker Hub and commits the version bump (via `bump-version.sh`, plus a rebuilt example jar) back to the branch.
 
+#### Docker Hub pages
+
+The Docker Hub overview pages are generated from [`dockerhub/active.md`](dockerhub/active.md) (supported images) and [`dockerhub/frozen.md`](dockerhub/frozen.md) (deprecated images, marked as frozen). The release workflow refreshes the active pages after each push. To update them by hand, run the **Update Docker Hub Descriptions** workflow, or `dockerhub/update-descriptions.sh <active|frozen|all>`. Add `--dry-run <dir>` to preview the pages locally.
+
 ### Deprecated Dockerfiles
 
 These Dockerfiles are kept for reference and manual builds only. They are not built by the GitHub workflow, not updated by `bump-version.sh`, and not published any more.

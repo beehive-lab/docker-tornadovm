@@ -1,0 +1,35 @@
+name: Update Docker Hub Descriptions
+
+# Updates the overview pages of the beehivelab TornadoVM images on Docker Hub from
+# dockerhub/active.md and dockerhub/frozen.md (see dockerhub/update-descriptions.sh).
+#
+#   active  the supported images; the release workflow also does this after each push
+#   frozen  the deprecated images, marked as no longer maintained (normally run once)
+#
+# Requires repo secrets DOCKERHUB_USERNAME / DOCKERHUB_TOKEN with admin rights on the
+# beehivelab repositories.
+
+on:
+  workflow_dispatch:
+    inputs:
+      images:
+        description: 'Which overview pages to update.'
+        required: true
+        type: choice
+        options: [active, frozen, all]
+        default: all
+
+jobs:
+  update:
+    name: Update ${{ inputs.images }} pages
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Update overview pages
+        run: dockerhub/update-descriptions.sh "${{ inputs.images }}"
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
