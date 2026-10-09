@@ -17,8 +17,10 @@ name: Build, Test & Push Docker Images
 #
 # Each is tagged with the bare release version (v7.2.0 -> 7.2.0) and `latest`.
 #
-# When push_images is set and every image passed, the commit-version-bump job runs
-# bump-version.sh for that version, rebuilds example/target/example-1.0-SNAPSHOT.jar
+# When push_images is set and every image passed, the dockerhub-descriptions job calls the
+# "Update Docker Hub Descriptions" workflow (update-dockerhub-descriptions.yml) to refresh
+# the Docker Hub overview pages of the active and frozen images, and the
+# commit-version-bump job runs bump-version.sh for that version, rebuilds example/target/example-1.0-SNAPSHOT.jar
 # with Maven against the matching tornado-api on Maven Central, and commits both back
 # to the branch the workflow ran on.
 #
@@ -143,6 +145,16 @@ jobs:
           else
             echo "Built and tested \`$IMAGE:${{ steps.derive.outputs.version }}\` (dry run, not pushed)." >> "$GITHUB_STEP_SUMMARY"
           fi
+
+  dockerhub-descriptions:
+    name: Update Docker Hub descriptions
+    needs: nvidia
+    if: inputs.push_images == true && needs.nvidia.result == 'success'
+    uses: ./.github/workflows/update-dockerhub-descriptions.yml
+    with:
+      images: all
+      version: ${{ inputs.version }}
+    secrets: inherit
 
   commit-version-bump:
     name: Commit version bump
