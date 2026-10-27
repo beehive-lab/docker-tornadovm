@@ -2,7 +2,7 @@
 
 [![](https://img.shields.io/badge/License-Apache%202.0-orange.svg)](https://opensource.org/licenses/Apache-2.0)
 
-* TornadoVM Docker for **NVIDIA GPUs** (✅ **supported**, TornadoVM `7.2.0`): See [instructions](https://github.com/beehive-lab/docker-tornadovm#nvidia-gpus)
+* TornadoVM Docker for **NVIDIA GPUs** (✅ **supported**, TornadoVM `8.0.0`): See [instructions](https://github.com/beehive-lab/docker-tornadovm#nvidia-gpus)
     * Backends: CUDA and OpenCL
     * JDKs supported:
 	    * TornadoVM with Eclipse Temurin JDK 21
@@ -52,7 +52,7 @@ The `jdk22plus` Dockerfiles take the JDK as a build argument (`JDK_VERSION`, def
 $ docker pull beehivelab/tornadovm-nvidia-cuda-jdk25:latest
 ```
 
-Each image is tagged with the TornadoVM release version (e.g. `7.2.0`) and `latest`.
+Each image is tagged with the TornadoVM release version (e.g. `8.0.0`) and `latest`.
 
 #### 2) Run an experiment
 
@@ -77,7 +77,7 @@ Your application must be compiled against the same TornadoVM release as the imag
 
 ```bash
 $ ./build.sh --nvidia-cuda-jdk25   # or --nvidia-{cuda,opencl}-jdk{21,25,27}
-$ TORNADOVM_VERSION=7.2.0 ./build.sh --nvidia-opencl-jdk25   # pick the TornadoVM release
+$ TORNADOVM_VERSION=8.0.0 ./build.sh --nvidia-opencl-jdk25   # pick the TornadoVM release
 ```
 
 #### Release a new version

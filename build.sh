@@ -13,8 +13,8 @@ TAG_VERSION_JDK22PLUS="${TAG_VERSION_JDK22PLUS:-7.2.0}"
 ## SDK (Dockerfile.nvidia.<backend>.jdk21); any JDK from 22 up uses the jdk22plus SDK
 ## (Dockerfile.nvidia.<backend>.jdk22plus, with --build-arg JDK_VERSION=<jdk>). Bare TornadoVM release
 ## version: used as the image tag, and as TORNADO_TAG "v${TORNADOVM_VERSION}" to pick the
-## SDK. Override with `TORNADOVM_VERSION=7.2.0 ./build.sh --nvidia-cuda-jdk25`.
-TORNADOVM_VERSION="${TORNADOVM_VERSION:-7.2.0}"
+## SDK. Override with `TORNADOVM_VERSION=8.0.0 ./build.sh --nvidia-cuda-jdk25`.
+TORNADOVM_VERSION="${TORNADOVM_VERSION:-8.0.0}"
 
 function buildDockerImage() {
     local IMAGE=$1
